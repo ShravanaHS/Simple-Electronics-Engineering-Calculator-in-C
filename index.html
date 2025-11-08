@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electronics Engineering Calculator</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-btn.active {
+            border-bottom-color: #2563eb; /* blue-600 */
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .tab-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .calc-section {
+            display: none; /* Hide all sections */
+        }
+        .calc-section.active {
+            display: block; /* Show active section */
+        }
+        
+        /* Sub-tabs for nested calculators */
+        .sub-tab-btn {
+            background-color: #f3f4f6; /* gray-100 */
+            border: 1px solid #d1d5db; /* gray-300 */
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem; /* rounded-md */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* medium */
+            color: #374151; /* gray-700 */
+            transition: all 0.2s ease;
+        }
+        .sub-tab-btn:hover {
+            background-color: #e5e7eb; /* gray-200 */
+        }
+        .sub-tab-btn.active {
+            background-color: #dbeafe; /* blue-100 */
+            color: #1d4ed8; /* blue-700 */
+            border-color: #93c5fd; /* blue-300 */
+        }
+        .sub-calc-section {
+            display: none;
+        }
+        .sub-calc-section.active {
+            display: block;
+        }
+
+        /* Resistor color dropdowns */
+        .color-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: none;
+            border-left-width: 8px;
+            padding-left: 0.5rem;
+        }
+        
+        /* Digital Logic Table */
+        #truth-table-output table {
+            width: 100%;
+            margin-top: 1rem;
+            border-collapse: collapse;
+        }
+        #truth-table-output th, #truth-table-output td {
+            border: 1px solid #d1d5db;
+            padding: 0.5rem;
+            text-align: center;
+        }
+        #truth-table-output th {
+            background-color: #f3f4f6;
+        }
+        
+        /* Dark theme overrides */
+        body.bg-gray-900 {
+            color: #d1d5db; /* gray-300 */
+        }
+        .sub-tab-btn {
+            background-color: #374151; /* gray-700 */
+            border-color: #4b5563; /* gray-600 */
+            color: #d1d5db; /* gray-300 */
+        }
+        .sub-tab-btn:hover {
+            background-color: #4b5563; /* gray-600 */
+        }
+        .sub-tab-btn.active {
+            background-color: #1e40af; /* blue-800 */
+            color: #eff6ff; /* blue-50 */
+            border-color: #2563eb; /* blue-600 */
+        }
+        .color-select {
+            background-color: #374151; /* gray-700 */
+            border-color: #4b5563; /* gray-600 */
+            color: white;
+        }
+        #truth-table-output th, #truth-table-output td {
+            border-color: #4b5563; /* gray-600 */
+        }
+        #truth-table-output th {
+            background-color: #1f2937; /* gray-800 */
+        }
+        
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto bg-gray-800 border border-gray-700 rounded-lg shadow-2xl overflow-hidden">
+        <header class="p-6 bg-gray-900 border-b border-gray-700">
+            <h1 class="text-3xl font-bold text-white">Electronics Engineering Calculator</h1>
+            <p class="mt-1 text-blue-300">A web-based version of the C-project by ShravanaHS</p>
+        </header>
+
+        <!-- Main Tab Navigation -->
+        <nav class="flex flex-wrap border-b border-gray-700 bg-gray-800">
+            <button class="tab-btn active flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="ohms-law">Ohm's Law</button>
+            <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="resistor">Resistor</button>
+            <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="capacitor">Capacitor</button>
+            <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="inductor">Inductor</button>
+            <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="digital">Digital Logic</button>
+            <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="math">Math Ops</button>
+        </nav>
+
+        <main class="p-6 md:p-8 bg-gray-800">
+
+            <!-- =================================================================== -->
+            <!-- Ohm's Law Calculator -->
+            <!-- =================================================================== -->
+            <section id="ohms-law" class="calc-section active">
+                <h2 class="text-2xl font-semibold mb-4 text-blue-300">Ohm's Law & Power (V, I, R, P)</h2>
+                
+                <!-- Sub-tabs for Ohm's Law -->
+                <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="ohms-law">
+                    <button class="sub-tab-btn active" data-sub-tab="ohms-v">Calculate Voltage (V)</button>
+                    <button class="sub-tab-btn" data-sub-tab="ohms-i">Calculate Current (I)</button>
+                    <button class="sub-tab-btn" data-sub-tab="ohms-r">Calculate Resistance (R)</button>
+                    <button class="sub-tab-btn" data-sub-tab="ohms-p">Calculate Power (P)</button>
+                </div>
+
+                <!-- Calculate Voltage -->
+                <div id="ohms-v" class="sub-calc-section active" data-sub-tab-parent="ohms-law">
+                    <div class="space-y-4">
+                        <select id="ohms-v-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+                            <option value="ir">from I and R (V = I * R)</option>
+                            <option value="pi">from P and I (V = P / I)</option>
+                            <option value="pr">from P and R (V = sqrt(P * R))</option>
+                        </select>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" id="ohms-v-i" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Current (A)">
+                            <input type="text" id="ohms-v-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)">
+                            <input type="text" id="ohms-v-p" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Power (W)" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Calculate Current -->
+                <div id="ohms-i" class="sub-calc-section" data-sub-tab-parent="ohms-law">
+                    <div class="space-y-4">
+                        <select id="ohms-i-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+                            <option value="vr">from V and R (I = V / R)</option>
+                            <option value="pv">from P and V (I = P / V)</option>
+                            <option value="pr">from P and R (I = sqrt(P / R))</option>
+                        </select>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" id="ohms-i-v" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Voltage (V)">
+                            <input type="text" id="ohms-i-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)">
+                            <input type="text" id="ohms-i-p" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Power (W)" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculate Resistance -->
+                <div id="ohms-r" class="sub-calc-section" data-sub-tab-parent="ohms-law">
+                    <div class="space-y-4">
+                        <select id="ohms-r-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+                            <option value="vi">from V and I (R = V / I)</option>
+                            <option value="vp">from V and P (R = V² / P)</option>
+                            <option value="pi">from P and I (R = P / I²)</option>
+                        </select>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" id="ohms-r-v" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Voltage (V)">
+                            <input type="text" id="ohms-r-i" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Current (A)">
+                            <input type="text" id="ohms-r-p" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Power (W)" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculate Power -->
+                <div id="ohms-p" class="sub-calc-section" data-sub-tab-parent="ohms-law">
+                    <div class="space-y-4">
+                        <select id="ohms-p-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+                            <option value="vi">from V and I (P = V * I)</option>
+                            <option value="vr">from V and R (P = V² / R)</option>
+                            <option value="ir">from I and R (P = I² * R)</option>
+                        </select>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" id="ohms-p-v" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Voltage (V)">
+                            <input type="text" id="ohms-p-i" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Current (A)">
+                            <input type="text" id="ohms-p-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Common Buttons and Result -->
+                <div class="mt-6 flex gap-4">
+                    <button id="calculate-ohms" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500">Calculate</button>
+                    <button id="clear-ohms" class="px-6 py-2 bg-gray-600 text-gray-100 font-medium rounded-md shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-400">Clear</button>
+                </div>
+                <div id="ohms-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
+                <div id="ohms-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+            </section>
+
+            <!-- =================================================================== -->
+            <!-- Resistor Calculator -->
+            <!-- =================================================================== -->
+            <section id="resistor" class="calc-section">
+                <h2 class="text-2xl font-semibold mb-4 text-blue-300">Resistor Calculator</h2>
+                
+                <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="resistor">
+                    <button class="sub-tab-btn active" data-sub-tab="res-series-parallel">Series / Parallel</button>
+                    <button class="sub-tab-btn" data-sub-tab="res-color-code">Color Code → Value</button>
+                    <button class="sub-tab-btn" data-sub-tab="res-smd-code">SMD Code → Value</button>
+                    <button class="sub-tab-btn" data-sub-tab="res-resistivity">Resistivity</button>
+                </div>
+
+                <!-- Resistor Series/Parallel -->
+                <div id="res-series-parallel" class="sub-calc-section active" data-sub-tab-parent="resistor">
+                    <label for="res-sp-values" class="block text-sm font-medium text-gray-300">Enter resistor values (comma separated)</label>
+                    <input type="text" id="res-sp-values" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 10k, 4.7k, 220">
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-res-series" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Series</button>
+                        <button id="calc-res-parallel" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Parallel</button>
+                    </div>
+                </div>
+
+                <!-- Resistor Color Code -->
+                <div id="res-color-code" class="sub-calc-section" data-sub-tab-parent="resistor">
+                    <select id="res-color-bands" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md mb-4">
+                        <option value="4">4-Band</option>
+                        <option value="5">5-Band</option>
+                    </select>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <select id="res-band-1" class="color-select w-full p-2 rounded-md"></select>
+                        <select id="res-band-2" class="color-select w-full p-2 rounded-md"></select>
+                        <select id="res-band-3" class="color-select w-full p-2 rounded-md" style="display: none;"></select>
+                        <select id="res-band-multiplier" class="color-select w-full p-2 rounded-md"></select>
+                        <select id="res-band-tolerance" class="color-select w-full p-2 rounded-md"></select>
+                    </div>
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-res-color" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Value</button>
+                    </div>
+                </div>
+                
+                <!-- Resistor SMD Code -->
+                <div id="res-smd-code" class="sub-calc-section" data-sub-tab-parent="resistor">
+                    <label for="res-smd-input" class="block text-sm font-medium text-gray-300">Enter 3/4-digit or EIA-96 Code</label>
+                    <input type="text" id="res-smd-input" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 472, 1001, 49C">
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-res-smd" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Decode SMD</button>
+                    </div>
+                </div>
+
+                <!-- Resistor Resistivity -->
+                <div id="res-resistivity" class="sub-calc-section" data-sub-tab-parent="resistor">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <select id="res-material" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
+                            <!-- Options added by JS -->
+                        </select>
+                        <input type="text" id="res-length" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Length (L) in meters">
+                        <input type="text" id="res-area" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Area (A) in m²">
+                    </div>
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-res-resistivity" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Resistance</button>
+                    </div>
+                </div>
+                
+                <!-- Common Result/Error for Resistor -->
+                <div id="res-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
+                <div id="res-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+            </section>
+
+            <!-- =================================================================== -->
+            <!-- Capacitor Calculator -->
+            <!-- =================================================================== -->
+            <section id="capacitor" class="calc-section">
+                <h2 class="text-2xl font-semibold mb-4 text-blue-300">Capacitor Calculator</h2>
+                
+                <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="capacitor">
+                    <button class="sub-tab-btn active" data-sub-tab="cap-series-parallel">Series / Parallel</button>
+                    <button class="sub-tab-btn" data-sub-tab="cap-charge-energy">Charge / Energy</button>
+                    <button class="sub-tab-btn" data-sub-tab="cap-tau-xc">Time Constant / Reactance</button>
+                    <button class="sub-tab-btn" data-sub-tab="cap-smd-code">SMD Code → Value</button>
+                </div>
+
+                <!-- Capacitor Series/Parallel -->
+                <div id="cap-series-parallel" class="sub-calc-section active" data-sub-tab-parent="capacitor">
+                    <label for="cap-sp-values" class="block text-sm font-medium text-gray-300">Enter capacitor values (comma separated)</label>
+                    <input type="text" id="cap-sp-values" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 10u, 22n, 100p">
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-cap-series" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Series</button>
+                        <button id="calc-cap-parallel" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Parallel</button>
+                    </div>
+                </div>
+
+                <!-- Capacitor Charge/Energy -->
+                <div id="cap-charge-energy" class="sub-calc-section" data-sub-tab-parent="capacitor">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="cap-ce-c" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Capacitance (F)">
+                        <input type="text" id="cap-ce-v" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Voltage (V)">
+                    </div>
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-cap-charge" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Charge (Q)</button>
+                        <button id="calc-cap-energy" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Energy (E)</button>
+                    </div>
+                </div>
+
+                <!-- Capacitor Time Constant/Reactance -->
+                <div id="cap-tau-xc" class="sub-calc-section" data-sub-tab-parent="capacitor">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" id="cap-tx-c" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Capacitance (F)">
+                        <input type="text" id="cap-tx-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)">
+                        <input type="text" id="cap-tx-f" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Frequency (Hz)">
+                    </div>
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-cap-tau" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Time Constant (τ)</button>
+                        <button id="calc-cap-xc" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Reactance (Xc)</button>
+                    </div>
+                </div>
+
+                <!-- Capacitor SMD Code -->
+                <div id="cap-smd-code" class="sub-calc-section" data-sub-tab-parent="capacitor">
+                    <label for="cap-smd-input" class="block text-sm font-medium text-gray-300">Enter 3-digit Code</label>
+                    <input type="text" id="cap-smd-input" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 104, 472, 225">
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-cap-smd" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Decode SMD</button>
+                    </div>
+                </div>
+                
+                <!-- Common Result/Error for Capacitor -->
+                <div id="cap-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
+                <div id="cap-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+            </section>
+
+            <!-- =================================================================== -->
+            <!-- Inductor Calculator -->
+            <!-- =================================================================== -->
+            <section id="inductor" class="calc-section">
+                <h2 class="text-2xl font-semibold mb-4 text-blue-300">Inductor Calculator</h2>
+                
+                <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="inductor">
+                    <button class="sub-tab-btn active" data-sub-tab="ind-series-parallel">Series / Parallel</button>
+                    <button class="sub-tab-btn" data-sub-tab="ind-energy">Energy</button>
+                    <button class="sub-tab-btn" data-sub-tab="ind-tau-xl">Time Constant / Reactance</button>
+                    <button class="sub-tab-btn" data-sub-tab="ind-smd-code">SMD Code → Value</button>
+                </div>
+
+                <!-- Inductor Series/Parallel -->
+                <div id="ind-series-parallel" class="sub-calc-section active" data-sub-tab-parent="inductor">
+                    <label for="ind-sp-values" class="block text-sm font-medium text-gray-300">Enter inductor values (comma separated)</label>
+                    <input type="text" id="ind-sp-values" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 10m, 4.7u, 22u">
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-ind-series" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Series</button>
+                        <button id="calc-ind-parallel" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Parallel</button>
+                    </div>
+                </div>
+
+                <!-- Inductor Energy -->
+                <div id="ind-energy" class="sub-calc-section" data-sub-tab-parent="inductor">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="ind-en-l" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Inductance (H)">
+                        <input type="text" id="ind-en-i" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Current (A)">
+                    </div>
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-ind-energy" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Energy (E)</button>
+                    </div>
+                </div>
+
+                <!-- Inductor Time Constant/Reactance -->
+                <div id="ind-tau-xl" class="sub-calc-section" data-sub-tab-parent="inductor">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" id="ind-tx-l" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Inductance (H)">
+                        <input type="text" id="ind-tx-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)">
+                        <input type="text" id="ind-tx-f" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Frequency (Hz)">
+                    </div>
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-ind-tau" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Time Constant (τ)</button>
+                        <button id="calc-ind-xl" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Reactance (Xl)</button>
+                    </div>
+                </div>
+
+                <!-- Inductor SMD Code -->
+                <div id="ind-smd-code" class="sub-calc-section" data-sub-tab-parent="inductor">
+                    <label for="ind-smd-input" class="block text-sm font-medium text-gray-300">Enter SMD Code</label>
+                    <input type="text" id="ind-smd-input" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 4R7, 101, 220">
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-ind-smd" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Decode SMD</button>
+                    </div>
+                </div>
+                
+                <!-- Common Result/Error for Inductor -->
+                <div id="ind-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
+                <div id="ind-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+            </section>
+
+            <!-- =================================================================== -->
+            <!-- Digital Logic Calculator -->
+            <!-- =================================================================== -->
+            <section id="digital" class="calc-section">
+                <h2 class="text-2xl font-semibold mb-4 text-blue-300">Digital Logic Module</h2>
+                
+                <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="digital">
+                    <button class="sub-tab-btn active" data-sub-tab="dig-convert">Number Conversion</button>
+                    <button class="sub-tab-btn" data-sub-tab="dig-bitwise">Bitwise Ops</button>
+                    <button class="sub-tab-btn" data-sub-tab="dig-shift">Shift / Rotate</button>
+                    <button class="sub-tab-btn" data-sub-tab="dig-truth-table">Truth Table</button>
+                    <button class="sub-tab-btn" data-sub-tab="dig-flip-flop">Flip-Flop</button>
+                </div>
+
+                <!-- Digital Number Conversion -->
+                <div id="dig-convert" class="sub-calc-section active" data-sub-tab-parent="digital">
+                    <label for="dig-conv-input" class="block text-sm font-medium text-gray-300">Enter number (0b, 0x, 0 for octal, or dec)</label>
+                    <input type="text" id="dig-conv-input" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 0b1011, 0xFF, 077, 255">
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-dig-convert" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Convert</button>
+                    </div>
+                </div>
+
+                <!-- Digital Bitwise Ops -->
+                <div id="dig-bitwise" class="sub-calc-section" data-sub-tab-parent="digital">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="dig-bit-a" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Operand A (e.g., 0b1010)">
+                        <input type="text" id="dig-bit-b" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Operand B (e.g., 0b1100)">
+                    </div>
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-dig-bitwise" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Ops</button>
+                    </div>
+                </div>
+
+                <!-- Digital Shift/Rotate -->
+                <div id="dig-shift" class="sub-calc-section" data-sub-tab-parent="digital">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="dig-shift-val" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Value (e.g., 0b1001)">
+                        <input type="number" id="dig-shift-amount" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Amount (0-31)" min="0" max="31">
+                    </div>
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-dig-shift" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Shift/Rotate</button>
+                    </div>
+                </div>
+
+                <!-- Digital Truth Table -->
+                <div id="dig-truth-table" class="sub-calc-section" data-sub-tab-parent="digital">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <select id="dig-gate-type" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
+                            <option value="AND">AND</option>
+                            <option value="OR">OR</option>
+                            <option value="NAND">NAND</option>
+                            <option value="NOR">NOR</option>
+                            <option value="XOR">XOR</option>
+                            <option value="XNOR">XNOR</option>
+                            <option value="NOT">NOT</option>
+                        </select>
+                        <select id="dig-gate-inputs" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
+                            <option value="1">1 Input</option>
+                            <option value="2">2 Inputs</option>
+                            <option value="3">3 Inputs</option>
+                        </select>
+                    </div>
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-dig-truth-table" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Generate Table</button>
+                    </div>
+                    <div id="truth-table-output" class="mt-4 overflow-x-auto"></div>
+                </div>
+
+                <!-- Digital Flip-Flop -->
+                <div id="dig-flip-flop" class="sub-calc-section" data-sub-tab-parent="digital">
+                    <select id="dig-ff-type" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md mb-4">
+                        <option value="SR">SR Flip-Flop</option>
+                        <option value="D">D Flip-Flop</option>
+                        <option value="JK">JK Flip-Flop</option>
+                    </select>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <select id="dig-ff-q" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
+                            <option value="0">Previous Q = 0</option>
+                            <option value="1">Previous Q = 1</option>
+                        </select>
+                        <select id="dig-ff-s" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
+                            <option value="0">S / D / J = 0</option>
+                            <option value="1">S / D / J = 1</option>
+                        </select>
+                        <select id="dig-ff-r" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
+                            <option value="0">R / K = 0</option>
+                            <option value="1">R / K = 1</option>
+                        </select>
+                    </div>
+                    <div class="mt-4 flex gap-4">
+                        <button id="calc-dig-ff" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Q(next)</button>
+                    </div>
+                </div>
+                
+                <!-- Common Result/Error for Digital -->
+                <div id="dig-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace;"></div>
+                <div id="dig-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+            </section>
+
+            <!-- =================================================================== -->
+            <!-- Math Ops Calculator -->
+            <!-- =================================================================== -->
+            <section id="math" class="calc-section">
+                <h2 class="text-2xl font-semibold mb-4 text-blue-300">Mathematical Operations</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="math-a" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Value A (supports prefixes)">
+                    <input type="text" id="math-b" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Value B (supports prefixes)">
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <button id="calc-math-add" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A + B</button>
+                    <button id="calc-math-sub" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A - B</button>
+                    <button id="calc-math-mul" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A * B</button>
+                    <button id="calc-math-div" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A / B</button>
+                    <button id="calc-math-pow" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A ^ B</button>
+                    <button id="calc-math-sqrt" class="px-4 py-2 bg-gray-600 text-gray-100 font-medium rounded-md shadow-sm hover:bg-gray-500">sqrt(A)</button>
+                    <button id="calc-math-log10" class="px-4 py-2 bg-gray-600 text-gray-100 font-medium rounded-md shadow-sm hover:bg-gray-500">log10(A)</button>
+                </div>
+                <!-- Common Result/Error for Math -->
+                <div id="math-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
+                <div id="math-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+            </section>
+
+        </main>
+
+        <footer class="p-4 bg-gray-900 border-t border-gray-700 text-center text-gray-400 text-sm">
+            Based on the <a href="https://github.com/ShravanaHS/Simple-Electronics-Engineering-Calculator-in-C" target="_blank" rel="noopener noreferrer" class="text-blue-300 hover:underline">original C project by ShravanaHS</a>.
+        </footer>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- JAVASCRIPT LOGIC -->
+    <!-- =================================================================== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Core Helper Functions ---
+
+            /**
+             * Parses a string with SI prefixes (e.g., "10k", "4.7u", "10M") into a float.
+             * This is a translation of your 'parse_with_prefix' C function.
+             */
+            function parseSI(value) {
+                if (typeof value !== 'string' || value.trim() === '') {
+                    return null;
+                }
+
+                value = value.trim();
+
+                // Handle special case 'R' for resistance/inductor SMD (e.g., 4R7 -> 4.7)
+                if (value.includes('R') || value.includes('r')) {
+                    value = value.replace('R', '.').replace('r', '.');
+                }
+                
+                let numPart = parseFloat(value);
+                if (isNaN(numPart)) return null;
+
+                let suffix = value.replace(/[0-9.-]/g, ''); // Get all non-numeric chars
+                suffix = suffix.trim().toLowerCase();
+
+                if (suffix.length > 0) {
+                    suffix = suffix[0]; // Use only the first letter
+                    switch (suffix) {
+                        case 't': return numPart * 1e12; // tera
+                        case 'g': return numPart * 1e9;  // giga
+                        case 'm': 
+                            // Check for 'M' (Mega) vs 'm' (milli)
+                            let originalSuffix = value.replace(/[0-9.-]/g, '').trim()[0];
+                            if (originalSuffix === 'M') {
+                                return numPart * 1e6; // mega
+                            } else {
+                                return numPart * 1e-3; // milli
+                            }
+                        case 'k': return numPart * 1e3;  // kilo
+                        case 'u': return numPart * 1e-6;  // micro
+                        case 'n': return numPart * 1e-9;  // nano
+                        case 'p': return numPart * 1e-12; // pico
+                        case 'f': return numPart * 1e-15; // femto
+                        default: return numPart; // Unknown suffix
+                    }
+                }
+                return numPart;
+            }
+
+            /**
+             * Formats a number into a string with the best-fitting SI prefix.
+             * This is a translation of your 'print_with_prefix' C function.
+             */
+            function formatSI(value, unit = '') {
+                if (value === 0) return `0 ${unit}`;
+                if (Math.abs(value) < 1e-15) return `0 ${unit}`; // Avoid log(0)
+                
+                const ranges = [
+                    { v: 1e12, s: 'T' },
+                    { v: 1e9, s: 'G' },
+                    { v: 1e6, s: 'M' },
+                    { v: 1e3, s: 'k' },
+                    { v: 1, s: '' },
+                    { v: 1e-3, s: 'm' },
+                    { v: 1e-6, s: 'µ' }, // Use 'µ' for micro
+                    { v: 1e-9, s: 'n' },
+                    { v: 1e-12, s: 'p' },
+                    { v: 1e-15, s: 'f' }
+                ];
+                
+                let absVal = Math.abs(value);
+                for (let i = 0; i < ranges.length; i++) {
+                    if (absVal >= ranges[i].v) {
+                        let num = value / ranges[i].v;
+                        num = parseFloat(num.toPrecision(4)); // Clean up floating point
+                        return `${num} ${ranges[i].s}${unit}`;
+                    }
+                }
+                // For smallest numbers
+                let num = value / 1e-15;
+                num = parseFloat(num.toPrecision(4));
+                return `${num} f${unit}`; 
+            }
+
+            // --- Main Tab Navigation Logic ---
+            const mainTabs = document.querySelectorAll('.tab-btn');
+            const mainSections = document.querySelectorAll('.calc-section');
+
+            mainTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    mainTabs.forEach(t => t.classList.remove('active'));
+                    mainSections.forEach(s => s.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                });
+            });
+
+            // --- Sub-Tab Navigation Logic ---
+            const subTabContainers = document.querySelectorAll('[data-sub-tab-container]');
+
+            subTabContainers.forEach(container => {
+                const subTabs = container.querySelectorAll('.sub-tab-btn');
+                const subSections = document.querySelectorAll(`[data-sub-tab-parent="${container.dataset.subTabContainer}"]`);
+
+                subTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        subTabs.forEach(t => t.classList.remove('active'));
+                        subSections.forEach(s => s.classList.remove('active'));
+                        tab.classList.add('active');
+                        document.getElementById(tab.dataset.subTab).classList.add('active');
+                    });
+                });
+            });
+
+
+            // --- Generic Result/Error Display Functions ---
+            function showResult(moduleId, text) {
+                const resEl = document.getElementById(`${moduleId}-result`);
+                const errEl = document.getElementById(`${moduleId}-error`);
+                if (resEl) {
+                    resEl.textContent = text;
+                    resEl.style.display = 'block';
+                }
+                if (errEl) errEl.style.display = 'none';
+            }
+
+            function showError(moduleId, text) {
+                const resEl = document.getElementById(`${moduleId}-result`);
+                const errEl = document.getElementById(`${moduleId}-error`);
+                if (errEl) {
+                    errEl.textContent = `Error: ${text}`;
+                    errEl.style.display = 'block';
+                }
+                if (resEl) resEl.style.display = 'none';
+            }
+
+            function clearResults(moduleId) {
+                const resEl = document.getElementById(`${moduleId}-result`);
+                const errEl = document.getElementById(`${moduleId}-error`);
+                if (resEl) resEl.style.display = 'none';
+                if (errEl) errEl.style.display = 'none';
+            }
+
+            // ===================================================================
+            // OHM'S LAW LOGIC
+            // ===================================================================
+            
+            // --- Ohm's Law UI Logic ---
+            const ohmsSelects = {
+                v: document.getElementById('ohms-v-select'),
+                i: document.getElementById('ohms-i-select'),
+                r: document.getElementById('ohms-r-select'),
+                p: document.getElementById('ohms-p-select')
+            };
+
+            const ohmsInputs = {
+                v: { i: document.getElementById('ohms-v-i'), r: document.getElementById('ohms-v-r'), p: document.getElementById('ohms-v-p') },
+                i: { v: document.getElementById('ohms-i-v'), r: document.getElementById('ohms-i-r'), p: document.getElementById('ohms-i-p') },
+                r: { v: document.getElementById('ohms-r-v'), i: document.getElementById('ohms-r-i'), p: document.getElementById('ohms-r-p') },
+                p: { v: document.getElementById('ohms-p-v'), i: document.getElementById('ohms-p-i'), r: document.getElementById('ohms-p-r') }
+            };
+
+            // Event listeners to show/hide correct inputs
+            ohmsSelects.v.addEventListener('change', () => {
+                const sel = ohmsSelects.v.value;
+                ohmsInputs.v.i.style.display = (sel === 'ir' || sel === 'pi') ? 'block' : 'none';
+                ohmsInputs.v.r.style.display = (sel === 'ir' || sel === 'pr') ? 'block' : 'none';
+                ohmsInputs.v.p.style.display = (sel === 'pi' || sel === 'pr') ? 'block' : 'none';
+            });
+            ohmsSelects.i.addEventListener('change', () => {
+                const sel = ohmsSelects.i.value;
+                ohmsInputs.i.v.style.display = (sel === 'vr' || sel === 'pv') ? 'block' : 'none';
+                ohmsInputs.i.r.style.display = (sel === 'vr' || sel === 'pr') ? 'block' : 'none';
+                ohmsInputs.i.p.style.display = (sel === 'pv' || sel === 'pr') ? 'block' : 'none';
+            });
+            ohmsSelects.r.addEventListener('change', () => {
+                const sel = ohmsSelects.r.value;
+                ohmsInputs.r.v.style.display = (sel === 'vi' || sel === 'vp') ? 'block' : 'none';
+                ohmsInputs.r.i.style.display = (sel === 'vi' || sel === 'pi') ? 'block' : 'none';
+                ohmsInputs.r.p.style.display = (sel === 'vp' || sel === 'pi') ? 'block' : 'none';
+            });
+            ohmsSelects.p.addEventListener('change', () => {
+                const sel = ohmsSelects.p.value;
+                ohmsInputs.p.v.style.display = (sel === 'vi' || sel === 'vr') ? 'block' : 'none';
+                ohmsInputs.p.i.style.display = (sel === 'vi' || sel === 'ir') ? 'block' : 'none';
+                ohmsInputs.p.r.style.display = (sel === 'vr' || sel === 'ir') ? 'block' : 'none';
+            });
+            
+            // Trigger change events to set initial state
+            ohmsSelects.v.dispatchEvent(new Event('change'));
+            ohmsSelects.i.dispatchEvent(new Event('change'));
+            ohmsSelects.r.dispatchEvent(new Event('change'));
+            ohmsSelects.p.dispatchEvent(new Event('change'));
+
+            // --- Ohm's Law Calculation Logic ---
+            document.getElementById('calculate-ohms').addEventListener('click', () => {
+                const activeTab = document.querySelector('[data-sub-tab-container="ohms-law"] .sub-tab-btn.active').dataset.subTab;
+                
+                try {
+                    let result, v, i, r, p;
+
+                    if (activeTab === 'ohms-v') {
+                        const sel = ohmsSelects.v.value;
+                        if (sel === 'ir') {
+                            i = parseSI(ohmsInputs.v.i.value);
+                            r = parseSI(ohmsInputs.v.r.value);
+                            if (i === null || r === null) throw new Error("Please enter valid Current and Resistance.");
+                            result = i * r;
+                            showResult('ohms', `Voltage (V) = ${formatSI(result, 'V')}`);
+                        } else if (sel === 'pi') {
+                            p = parseSI(ohmsInputs.v.p.value);
+                            i = parseSI(ohmsInputs.v.i.value);
+                            if (p === null || i === null) throw new Error("Please enter valid Power and Current.");
+                            if (i === 0) throw new Error("Division by zero (I = 0).");
+                            result = p / i;
+                            showResult('ohms', `Voltage (V) = ${formatSI(result, 'V')}`);
+                        } else if (sel === 'pr') {
+                            p = parseSI(ohmsInputs.v.p.value);
+                            r = parseSI(ohmsInputs.v.r.value);
+                            if (p === null || r === null) throw new Error("Please enter valid Power and Resistance.");
+                            if (p * r < 0) throw new Error("Cannot take square root of a negative number.");
+                            result = Math.sqrt(p * r);
+                            showResult('ohms', `Voltage (V) = ${formatSI(result, 'V')}`);
+                        }
+                    } else if (activeTab === 'ohms-i') {
+                        const sel = ohmsSelects.i.value;
+                        if (sel === 'vr') {
+                            v = parseSI(ohmsInputs.i.v.value);
+                            r = parseSI(ohmsInputs.i.r.value);
+                            if (v === null || r === null) throw new Error("Please enter valid Voltage and Resistance.");
+                            if (r === 0) throw new Error("Division by zero (R = 0).");
+                            result = v / r;
+                            showResult('ohms', `Current (I) = ${formatSI(result, 'A')}`);
+                        } else if (sel === 'pv') {
+                            p = parseSI(ohmsInputs.i.p.value);
+                            v = parseSI(ohmsInputs.i.v.value);
+                            if (p === null || v === null) throw new Error("Please enter valid Power and Voltage.");
+                            if (v === 0) throw new Error("Division by zero (V = 0).");
+                            result = p / v;
+                            showResult('ohms', `Current (I) = ${formatSI(result, 'A')}`);
+                        } else if (sel === 'pr') {
+                            p = parseSI(ohmsInputs.i.p.value);
+                            r = parseSI(ohmsInputs.i.r.value);
+                            if (p === null || r === null) throw new Error("Please enter valid Power and Resistance.");
+                            if (r <= 0) throw new Error("R must be > 0.");
+                            if (p < 0) throw new Error("P must be >= 0.");
+                            result = Math.sqrt(p / r);
+                            showResult('ohms', `Current (I) = ${formatSI(result, 'A')}`);
+                        }
+                    } else if (activeTab === 'ohms-r') {
+                        const sel = ohmsSelects.r.value;
+                        if (sel === 'vi') {
+                            v = parseSI(ohmsInputs.r.v.value);
+                            i = parseSI(ohmsInputs.r.i.value);
+                            if (v === null || i === null) throw new Error("Please enter valid Voltage and Current.");
+                            if (i === 0) throw new Error("Division by zero (I = 0).");
+                            result = v / i;
+                            showResult('ohms', `Resistance (R) = ${formatSI(result, 'Ω')}`);
+                        } else if (sel === 'vp') {
+                            v = parseSI(ohmsInputs.r.v.value);
+                            p = parseSI(ohmsInputs.r.p.value);
+                            if (v === null || p === null) throw new Error("Please enter valid Voltage and Power.");
+                            if (p === 0) throw new Error("Division by zero (P = 0).");
+                            result = (v * v) / p;
+                            showResult('ohms', `Resistance (R) = ${formatSI(result, 'Ω')}`);
+                        } else if (sel === 'pi') {
+                            p = parseSI(ohmsInputs.r.p.value);
+                            i = parseSI(ohmsInputs.r.i.value);
+                            if (p === null || i === null) throw new Error("Please enter valid Power and Current.");
+                            if (i === 0) throw new Error("Division by zero (I = 0).");
+                            result = p / (i * i);
+                            showResult('ohms', `Resistance (R) = ${formatSI(result, 'Ω')}`);
+                        }
+                    } else if (activeTab === 'ohms-p') {
+                        const sel = ohmsSelects.p.value;
+                        if (sel === 'vi') {
+                            v = parseSI(ohmsInputs.p.v.value);
+                            i = parseSI(ohmsInputs.p.i.value);
+                            if (v === null || i === null) throw new Error("Please enter valid Voltage and Current.");
+                            result = v * i;
+                            showResult('ohms', `Power (P) = ${formatSI(result, 'W')}`);
+                        } else if (sel === 'vr') {
+                            v = parseSI(ohmsInputs.p.v.value);
+                            r = parseSI(ohmsInputs.p.r.value);
+                            if (v === null || r === null) throw new Error("Please enter valid Voltage and Resistance.");
+                            if (r === 0) throw new Error("Division by zero (R = 0).");
+                            result = (v * v) / r;
+                            showResult('ohms', `Power (P) = ${formatSI(result, 'W')}`);
+                        } else if (sel === 'ir') {
+                            i = parseSI(ohmsInputs.p.i.value);
+                            r = parseSI(ohmsInputs.p.r.value);
+                            if (i === null || r === null) throw new Error("Please enter valid Current and Resistance.");
+                            result = (i * i) * r;
+                            showResult('ohms', `Power (P) = ${formatSI(result, 'W')}`);
+                        }
+                    }
+
+                } catch (e) {
+                    showError('ohms', e.message);
+                }
+            });
+
+            document.getElementById('clear-ohms').addEventListener('click', () => {
+                for (let type in ohmsInputs) {
+                    for (let input in ohmsInputs[type]) {
+                        ohmsInputs[type][input].value = '';
+                    }
+                }
+                clearResults('ohms');
+            });
+
+            // ===================================================================
+            // RESISTOR LOGIC
+            // ===================================================================
+            
+            // --- Helper: Parse list of values ---
+            function parseValueList(inputId, moduleId) {
+                const valuesStr = document.getElementById(inputId).value;
+                if (valuesStr.trim() === '') throw new Error("Please enter at least one value.");
+                const values = valuesStr.split(',').map(v => parseSI(v.trim())).filter(v => v !== null);
+                if (values.length === 0) throw new Error("No valid values entered.");
+                return values;
+            }
+
+            // --- Series/Parallel ---
+            document.getElementById('calc-res-series').addEventListener('click', () => {
+                try {
+                    const values = parseValueList('res-sp-values', 'res');
+                    const total = values.reduce((acc, v) => acc + v, 0);
+                    showResult('res', `Equivalent Series Resistance = ${formatSI(total, 'Ω')}`);
+                } catch (e) {
+                    showError('res', e.message);
+                }
+            });
+
+            document.getElementById('calc-res-parallel').addEventListener('click', () => {
+                try {
+                    const values = parseValueList('res-sp-values', 'res');
+                    let inv_total = 0;
+                    for (const v of values) {
+                        if (v === 0) throw new Error("Resistance cannot be zero in a parallel circuit.");
+                        inv_total += 1.0 / v;
+                    }
+                    const total = 1.0 / inv_total;
+                    showResult('res', `Equivalent Parallel Resistance = ${formatSI(total, 'Ω')}`);
+                } catch (e) {
+                    showError('res', e.message);
+                }
+            });
+
+            // --- Resistivity ---
+            const materials = {
+                "Copper": 1.68e-8, "Aluminum": 2.65e-8, "Gold": 2.44e-8,
+                "Silver": 1.59e-8, "Nichrome": 1.10e-6, "Iron": 9.71e-8, "Tungsten": 5.60e-8
+            };
+            const materialSelect = document.getElementById('res-material');
+            Object.keys(materials).forEach(m => {
+                materialSelect.options.add(new Option(m, materials[m]));
+            });
+
+            document.getElementById('calc-res-resistivity').addEventListener('click', () => {
+                try {
+                    const rho = parseFloat(materialSelect.value);
+                    const L = parseSI(document.getElementById('res-length').value);
+                    const A = parseSI(document.getElementById('res-area').value);
+                    const name = materialSelect.options[materialSelect.selectedIndex].text;
+                    
+                    if (L === null || A === null) throw new Error("Please enter valid Length and Area.");
+                    if (A === 0) throw new Error("Area cannot be zero.");
+                    
+                    const R = (rho * L) / A;
+                    showResult('res', `Resistance for ${name} = ${formatSI(R, 'Ω')}`);
+                } catch (e) {
+                    showError('res', e.message);
+                }
+            });
+
+            // --- Color Code ---
+            const resColorMap = {
+                black:  { value: 0, multiplier: 1,    tolerance: null, color: '#000000', text: 'white' },
+                brown:  { value: 1, multiplier: 10,   tolerance: 1,    color: '#a52a2a', text: 'white' },
+                red:    { value: 2, multiplier: 100,  tolerance: 2,    color: '#ff0000', text: 'white' },
+                orange: { value: 3, multiplier: 1e3,  tolerance: null, color: '#ffa500', text: 'black' },
+                yellow: { value: 4, multiplier: 1e4,  tolerance: null, color: '#ffff00', text: 'black' },
+                green:  { value: 5, multiplier: 1e5,  tolerance: 0.5,  color: '#008000', text: 'white' },
+                blue:   { value: 6, multiplier: 1e6,  tolerance: 0.25, color: '#0000ff', text: 'white' },
+                violet: { value: 7, multiplier: 1e7,  tolerance: 0.1,  color: '#ee82ee', text: 'black' },
+                grey:   { value: 8, multiplier: 1e8,  tolerance: 0.05, color: '#808080', text: 'white' },
+                white:  { value: 9, multiplier: 1e9,  tolerance: null, color: '#ffffff', text: 'black' },
+                gold:   { value: -1, multiplier: 0.1,  tolerance: 5,    color: '#ffd700', text: 'black' },
+                silver: { value: -2, multiplier: 0.01, tolerance: 10,   color: '#c0c0c0', text: 'black' }
+            };
+            const selects = {
+                b1: document.getElementById('res-band-1'),
+                b2: document.getElementById('res-band-2'),
+                b3: document.getElementById('res-band-3'),
+                mult: document.getElementById('res-band-multiplier'),
+                tol: document.getElementById('res-band-tolerance')
+            };
+            
+            function populateSelect(selectEl, type) {
+                selectEl.innerHTML = ''; // Clear
+                for (const color in resColorMap) {
+                    const data = resColorMap[color];
+                    let add = false;
+                    if (type === 'digit' && data.value >= 0) add = true;
+                    if (type === 'multiplier' && data.multiplier) add = true;
+                    if (type === 'tolerance' && data.tolerance) add = true;
+                    
+                    if (add) {
+                        const opt = new Option(color.charAt(0).toUpperCase() + color.slice(1), color);
+                        opt.style.backgroundColor = data.color;
+                        opt.style.color = data.text;
+                        selectEl.add(opt);
+                    }
+                }
+            }
+            function updateColorSelect(selectEl) {
+                const data = resColorMap[selectEl.value];
+                if (data) {
+                    selectEl.style.backgroundColor = data.color;
+                    selectEl.style.color = data.text;
+                    selectEl.style.borderColor = data.color;
+                }
+            }
+            
+            populateSelect(selects.b1, 'digit');
+            populateSelect(selects.b2, 'digit');
+            populateSelect(selects.b3, 'digit');
+            populateSelect(selects.mult, 'multiplier');
+            populateSelect(selects.tol, 'tolerance');
+            
+            [selects.b1, selects.b2, selects.b3, selects.mult, selects.tol].forEach(s => {
+                s.addEventListener('change', () => updateColorSelect(s));
+                updateColorSelect(s); // Set initial color
+            });
+            
+            document.getElementById('res-color-bands').addEventListener('change', (e) => {
+                selects.b3.style.display = (e.target.value === '5') ? 'block' : 'none';
+            });
+
+            document.getElementById('calc-res-color').addEventListener('click', () => {
+                try {
+                    const bands = document.getElementById('res-color-bands').value;
+                    let v1 = resColorMap[selects.b1.value].value;
+                    let v2 = resColorMap[selects.b2.value].value;
+                    let v3 = (bands === '5') ? resColorMap[selects.b3.value].value : 0;
+                    let mult = resColorMap[selects.mult.value].multiplier;
+                    let tol = resColorMap[selects.tol.value].tolerance;
+
+                    let baseVal;
+                    if (bands === '4') {
+                        baseVal = v1 * 10 + v2;
+                    } else {
+                        baseVal = v1 * 100 + v2 * 10 + v3;
+                    }
+                    
+                    const total = baseVal * mult;
+                    showResult('res', `Resistance = ${formatSI(total, 'Ω')} ±${tol}%`);
+                } catch (e) {
+                    showError('res', "Invalid color selection.");
+                }
+            });
+            
+            // --- SMD Resistor ---
+            const eia96_values = [
+                100, 102, 105, 107, 110, 113, 115, 118, 121, 124, 127, 130, 133, 137, 140, 143,
+                147, 150, 154, 158, 162, 165, 169, 174, 178, 182, 187, 191, 196, 200, 205, 210,
+                215, 221, 226, 232, 237, 243, 249, 255, 261, 267, 274, 280, 287, 294, 301, 309,
+                316, 324, 332, 340, 348, 357, 365, 374, 383, 392, 402, 412, 422, 432, 442, 453,
+                464, 475, 487, 499, 511, 523, 536, 549, 562, 576, 590, 604, 619, 634, 649, 665,
+                681, 698, 715, 732, 750, 768, 787, 806, 825, 845, 866, 887, 909, 931, 953, 976
+            ];
+            const eia96_mult = {
+                'Z': 0.001, 'Y': 0.01, 'R': 0.01, 'X': 0.1, 'S': 0.1, 'A': 1, 'B': 10, 'H': 10,
+                'C': 100, 'D': 1000, 'E': 10000, 'F': 100000
+            };
+
+            document.getElementById('calc-res-smd').addEventListener('click', () => {
+                try {
+                    const code = document.getElementById('res-smd-input').value.trim().toUpperCase();
+                    if (code.length === 0) throw new Error("Please enter a code.");
+                    
+                    // EIA-96 (e.g., 49C)
+                    if (code.length === 3 && isNaN(parseInt(code[0])) === false && isNaN(parseInt(code[2])) === true) {
+                        const valCode = parseInt(code.substring(0, 2));
+                        const multChar = code[2];
+                        if (valCode < 1 || valCode > 96 || !eia96_mult[multChar]) {
+                            throw new Error("Invalid EIA-96 code.");
+                        }
+                        const baseVal = eia96_values[valCode - 1];
+                        const mult = eia96_mult[multChar];
+                        const total = baseVal * mult;
+                        showResult('res', `EIA-96 Resistor = ${formatSI(total, 'Ω')}`);
+                    }
+                    // 3-digit (e.g., 472) or 4-digit (e.g., 1001)
+                    else if (!isNaN(parseInt(code))) {
+                        let base, multPow, total;
+                        if (code.length === 3) {
+                            base = parseInt(code.substring(0, 2));
+                            multPow = parseInt(code[2]);
+                            total = base * Math.pow(10, multPow);
+                        } else if (code.length === 4) {
+                            base = parseInt(code.substring(0, 3));
+                            multPow = parseInt(code[3]);
+                            total = base * Math.pow(10, multPow);
+                        } else {
+                            throw new Error("Numeric code must be 3 or 4 digits.");
+                        }
+                        showResult('res', `SMD Resistor = ${formatSI(total, 'Ω')}`);
+                    }
+                    // Contains 'R' (e.g., 4R7)
+                    else if (code.includes('R')) {
+                         const total = parseFloat(code.replace('R', '.'));
+                         if (isNaN(total)) throw new Error("Invalid 'R' notation code.");
+                         showResult('res', `SMD Resistor = ${formatSI(total, 'Ω')}`);
+                    }
+                    else {
+                        throw new Error("Unknown or unsupported SMD code format.");
+                    }
+                } catch (e) {
+                    showError('res', e.message);
+                }
+            });
+
+
+            // ===================================================================
+            // CAPACITOR LOGIC
+            // ===================================================================
+
+            document.getElementById('calc-cap-series').addEventListener('click', () => {
+                try {
+                    const values = parseValueList('cap-sp-values', 'cap');
+                    let inv_total = 0;
+                    for (const v of values) {
+                        if (v === 0) throw new Error("Capacitance cannot be zero.");
+                        inv_total += 1.0 / v;
+                    }
+                    const total = 1.0 / inv_total;
+                    showResult('cap', `Equivalent Series Capacitance = ${formatSI(total, 'F')}`);
+                } catch (e) {
+                    showError('cap', e.message);
+                }
+            });
+            
+            document.getElementById('calc-cap-parallel').addEventListener('click', () => {
+                try {
+                    const values = parseValueList('cap-sp-values', 'cap');
+                    const total = values.reduce((acc, v) => acc + v, 0);
+                    showResult('cap', `Equivalent Parallel Capacitance = ${formatSI(total, 'F')}`);
+                } catch (e) {
+                    showError('cap', e.message);
+                }
+            });
+            
+            document.getElementById('calc-cap-charge').addEventListener('click', () => {
+                try {
+                    const C = parseSI(document.getElementById('cap-ce-c').value);
+                    const V = parseSI(document.getElementById('cap-ce-v').value);
+                    if (C === null || V === null) throw new Error("Please enter valid Capacitance and Voltage.");
+                    const Q = C * V;
+                    showResult('cap', `Charge (Q) = ${formatSI(Q, 'C')}`);
+                } catch (e) {
+                    showError('cap', e.message);
+                }
+            });
+            
+            document.getElementById('calc-cap-energy').addEventListener('click', () => {
+                try {
+                    const C = parseSI(document.getElementById('cap-ce-c').value);
+                    const V = parseSI(document.getElementById('cap-ce-v').value);
+                    if (C === null || V === null) throw new Error("Please enter valid Capacitance and Voltage.");
+                    const E = 0.5 * C * V * V;
+                    showResult('cap', `Energy (E) = ${formatSI(E, 'J')}`);
+                } catch (e) {
+                    showError('cap', e.message);
+                }
+            });
+            
+            document.getElementById('calc-cap-tau').addEventListener('click', () => {
+                try {
+                    const C = parseSI(document.getElementById('cap-tx-c').value);
+                    const R = parseSI(document.getElementById('cap-tx-r').value);
+                    if (C === null || R === null) throw new Error("Please enter valid Capacitance and Resistance.");
+                    const T = R * C;
+                    showResult('cap', `Time Constant (τ) = ${formatSI(T, 's')}`);
+                } catch (e) {
+                    showError('cap', e.message);
+                }
+            });
+            
+            document.getElementById('calc-cap-xc').addEventListener('click', () => {
+                try {
+                    const C = parseSI(document.getElementById('cap-tx-c').value);
+                    const F = parseSI(document.getElementById('cap-tx-f').value);
+                    if (C === null || F === null) throw new Error("Please enter valid Capacitance and Frequency.");
+                    if (C === 0 || F === 0) throw new Error("Capacitance and Frequency must not be zero.");
+                    const Xc = 1.0 / (2.0 * Math.PI * F * C);
+                    showResult('cap', `Capacitive Reactance (Xc) = ${formatSI(Xc, 'Ω')}`);
+                } catch (e) {
+                    showError('cap', e.message);
+                }
+            });
+            
+            document.getElementById('calc-cap-smd').addEventListener('click', () => {
+                try {
+                    const code = document.getElementById('cap-smd-input').value.trim();
+                    if (code.length !== 3 || isNaN(parseInt(code))) {
+                        throw new Error("Invalid code. Must be 3 digits (e.g., 104).");
+                    }
+                    const base = parseInt(code.substring(0, 2));
+                    const multPow = parseInt(code[2]);
+                    const value_pf = base * Math.pow(10, multPow); // Value in pF
+                    const total = value_pf * 1e-12; // Value in Farads
+                    showResult('cap', `Capacitance = ${formatSI(total, 'F')} (${value_pf} pF)`);
+                } catch (e) {
+                    showError('cap', e.message);
+                }
+            });
+            
+            // ===================================================================
+            // INDUCTOR LOGIC
+            // ===================================================================
+
+            document.getElementById('calc-ind-series').addEventListener('click', () => {
+                try {
+                    const values = parseValueList('ind-sp-values', 'ind');
+                    const total = values.reduce((acc, v) => acc + v, 0);
+                    showResult('ind', `Equivalent Series Inductance = ${formatSI(total, 'H')}`);
+                } catch (e) {
+                    showError('ind', e.message);
+                }
+            });
+            
+            document.getElementById('calc-ind-parallel').addEventListener('click', () => {
+                try {
+                    const values = parseValueList('ind-sp-values', 'ind');
+                    let inv_total = 0;
+                    for (const v of values) {
+                        if (v === 0) throw new Error("Inductance cannot be zero in a parallel circuit.");
+                        inv_total += 1.0 / v;
+                    }
+                    const total = 1.0 / inv_total;
+                    showResult('ind', `Equivalent Parallel Inductance = ${formatSI(total, 'H')}`);
+                } catch (e) {
+                    showError('ind', e.message);
+                }
+            });
+            
+            document.getElementById('calc-ind-energy').addEventListener('click', () => {
+                try {
+                    const L = parseSI(document.getElementById('ind-en-l').value);
+                    const I = parseSI(document.getElementById('ind-en-i').value);
+                    if (L === null || I === null) throw new Error("Please enter valid Inductance and Current.");
+                    const E = 0.5 * L * I * I;
+                    showResult('ind', `Energy (E) = ${formatSI(E, 'J')}`);
+                } catch (e) {
+                    showError('ind', e.message);
+                }
+            });
+            
+            document.getElementById('calc-ind-tau').addEventListener('click', () => {
+                try {
+                    const L = parseSI(document.getElementById('ind-tx-l').value);
+                    const R = parseSI(document.getElementById('ind-tx-r').value);
+                    if (L === null || R === null) throw new Error("Please enter valid Inductance and Resistance.");
+                    if (R === 0) throw new Error("Resistance cannot be zero.");
+                    const T = L / R;
+                    showResult('ind', `Time Constant (τ) = ${formatSI(T, 's')}`);
+                } catch (e) {
+                    showError('ind', e.message);
+                }
+            });
+            
+            document.getElementById('calc-ind-xl').addEventListener('click', () => {
+                try {
+                    const L = parseSI(document.getElementById('ind-tx-l').value);
+                    const F = parseSI(document.getElementById('ind-tx-f').value);
+                    if (L === null || F === null) throw new Error("Please enter valid Inductance and Frequency.");
+                    const Xl = 2.0 * Math.PI * F * L;
+                    showResult('ind', `Inductive Reactance (Xl) = ${formatSI(Xl, 'Ω')}`);
+                } catch (e) {
+                    showError('ind', e.message);
+                }
+            });
+            
+            document.getElementById('calc-ind-smd').addEventListener('click', () => {
+                try {
+                    const code = document.getElementById('ind-smd-input').value.trim().toUpperCase();
+                    if (code.length === 0) throw new Error("Please enter a code.");
+                    
+                    let total_uH;
+                    // Contains 'R' (e.g., 4R7 -> 4.7 uH)
+                    if (code.includes('R')) {
+                        total_uH = parseFloat(code.replace('R', '.'));
+                        if (isNaN(total_uH)) throw new Error("Invalid 'R' notation code.");
+                    }
+                    // 3-digit (e.g., 101 -> 10 * 10^1 = 100 uH)
+                    else if (code.length === 3 && !isNaN(parseInt(code))) {
+                        const base = parseInt(code.substring(0, 2));
+                        const multPow = parseInt(code[2]);
+                        total_uH = base * Math.pow(10, multPow);
+                    } else {
+                        throw new Error("Unknown code format. Use '4R7' or '101' style.");
+                    }
+                    
+                    const total_H = total_uH * 1e-6; // Convert uH to H
+                    showResult('ind', `Inductance = ${formatSI(total_H, 'H')} (${total_uH} µH)`);
+                } catch (e) {
+                    showError('ind', e.message);
+                }
+            });
+
+            // ===================================================================
+            // DIGITAL LOGIC LOGIC
+            // ===================================================================
+
+            function parseDigitalInt(s) {
+                s = s.trim().toLowerCase();
+                if (s.startsWith('0b')) return parseInt(s.substring(2), 2);
+                if (s.startsWith('0x')) return parseInt(s.substring(2), 16);
+                if (s.startsWith('0') && s.length > 1 && !s.includes('.')) return parseInt(s, 8);
+                const val = parseInt(s, 10);
+                if (isNaN(val)) throw new Error(`'${s}' is not a valid number.`);
+                return val;
+            }
+            
+            function toBin(val) {
+                return (val >>> 0).toString(2).padStart(32, '0').replace(/(\d{4})(?=\d)/g, '$1 ');
+            }
+
+            // --- Number Conversion ---
+            document.getElementById('calc-dig-convert').addEventListener('click', () => {
+                try {
+                    const val = parseDigitalInt(document.getElementById('dig-conv-input').value);
+                    let result = `DEC: ${val}\n`;
+                    result += `HEX: 0x${val.toString(16).toUpperCase()}\n`;
+                    result += `OCT: 0${val.toString(8)}\n`;
+                    result += `BIN: ${toBin(val)}`;
+                    showResult('dig', result);
+                } catch (e) {
+                    showError('dig', e.message);
+                }
+            });
+
+            // --- Bitwise Ops ---
+            document.getElementById('calc-dig-bitwise').addEventListener('click', () => {
+                try {
+                    const a = parseDigitalInt(document.getElementById('dig-bit-a').value);
+                    const b = parseDigitalInt(document.getElementById('dig-bit-b').value);
+                    let result =  `A     = ${toBin(a)}\n`;
+                    result +=       `B     = ${toBin(b)}\n`;
+                    result +=       `-----------------------------------------\n`;
+                    result +=       `A & B = ${toBin(a & b)} (AND)\n`;
+                    result +=       `A | B = ${toBin(a | b)} (OR)\n`;
+                    result +=       `A ^ B = ${toBin(a ^ b)} (XOR)\n`;
+                    result +=       `~A    = ${toBin(~a)} (NOT A)\n`;
+                    result +=       `A<<1  = ${toBin(a << 1)} (Shift Left)\n`;
+                    result +=       `A>>1  = ${toBin(a >> 1)} (Shift Right)`;
+                    showResult('dig', result);
+                } catch (e) {
+                    showError('dig', e.message);
+                }
+            });
+            
+            // --- Shift/Rotate ---
+            function rol(val, n) { n &= 31; return (val << n) | (val >>> (32 - n)); }
+            function ror(val, n) { n &= 31; return (val >>> n) | (val << (32 - n)); }
+            
+            document.getElementById('calc-dig-shift').addEventListener('click', () => {
+                try {
+                    const val = parseDigitalInt(document.getElementById('dig-shift-val').value);
+                    const n = parseInt(document.getElementById('dig-shift-amount').value);
+                    if (isNaN(n) || n < 0 || n > 31) throw new Error("Shift amount must be 0-31.");
+                    
+                    let result =  `Value:    ${toBin(val)}\n`;
+                    result +=       `L Shift << ${n}: ${toBin(val << n)}\n`;
+                    result +=       `R Shift >> ${n}: ${toBin(val >> n)}\n`;
+                    result +=       `Rotate L rol ${n}: ${toBin(rol(val, n))}\n`;
+                    result +=       `Rotate R ror ${n}: ${toBin(ror(val, n))}`;
+                    showResult('dig', result);
+                } catch (e) {
+                    showError('dig', e.message);
+                }
+            });
+            
+            // --- Truth Table ---
+            document.getElementById('dig-gate-type').addEventListener('change', (e) => {
+                document.getElementById('dig-gate-inputs').disabled = (e.target.value === 'NOT');
+                if (e.target.value === 'NOT') {
+                    document.getElementById('dig-gate-inputs').value = '1';
+                }
+            });
+            
+            document.getElementById('calc-dig-truth-table').addEventListener('click', () => {
+                try {
+                    clearResults('dig');
+                    const gate = document.getElementById('dig-gate-type').value;
+                    const n = (gate === 'NOT') ? 1 : parseInt(document.getElementById('dig-gate-inputs').value);
+                    const rows = 1 << n;
+                    
+                    let table = '<table class="w-full mt-4 text-center"><thead><tr>';
+                    const headers = [];
+                    for (let i = 0; i < n; i++) headers.push(String.fromCharCode(65 + i)); // A, B, C
+                    table += headers.map(h => `<th class="p-2 border border-gray-600 bg-gray-700">${h}</th>`).join('');
+                    table += `<th class="p-2 border border-gray-600 bg-gray-700">Out</th></tr></thead><tbody>`;
+
+                    for (let r = 0; r < rows; r++) {
+                        table += '<tr>';
+                        let inputs = [];
+                        for (let b = 0; b < n; b++) {
+                            const val = (r >> (n - 1 - b)) & 1;
+                            inputs.push(val);
+                            table += `<td class="p-2 border border-gray-600">${val}</td>`;
+                        }
+                        
+                        let out;
+                        switch (gate) {
+                            case 'AND': out = inputs.reduce((a, b) => a & b, 1); break;
+                            case 'OR':  out = inputs.reduce((a, b) => a | b, 0); break;
+                            case 'NAND':out = inputs.reduce((a, b) => a & b, 1) ? 0 : 1; break;
+                            case 'NOR': out = inputs.reduce((a, b) => a | b, 0) ? 0 : 1; break;
+                            case 'XOR': out = inputs.reduce((a, b) => a ^ b, 0); break;
+                            case 'XNOR':out = inputs.reduce((a, b) => a ^ b, 0) ? 0 : 1; break;
+                            case 'NOT': out = inputs[0] ? 0 : 1; break;
+                        }
+                        table += `<td class="p-2 border border-gray-600 font-bold">${out}</td></tr>`;
+                    }
+                    table += '</tbody></table>';
+                    document.getElementById('truth-table-output').innerHTML = table;
+
+                } catch (e) {
+                    showError('dig', e.message);
+                }
+            });
+            
+            // --- Flip Flop ---
+            document.getElementById('dig-ff-type').addEventListener('change', (e) => {
+                const type = e.target.value;
+                document.getElementById('dig-ff-s').style.display = 'block';
+                document.getElementById('dig-ff-r').style.display = (type === 'D') ? 'none' : 'block';
+                
+                // Update labels
+                const sLabel = document.querySelector('label[for="dig-ff-s"]'); // Would need to add labels
+                const rLabel = document.querySelector('label[for="dig-ff-r"]');
+                // This is simpler:
+                document.getElementById('dig-ff-s').options[0].text = (type === 'D') ? 'D = 0' : 'S / J = 0';
+                document.getElementById('dig-ff-s').options[1].text = (type === 'D') ? 'D = 1' : 'S / J = 1';
+                document.getElementById('dig-ff-r').options[0].text = 'R / K = 0';
+                document.getElementById('dig-ff-r').options[1].text = 'R / K = 1';
+            });
+            document.getElementById('dig-ff-type').dispatchEvent(new Event('change')); // Init
+            
+            document.getElementById('calc-dig-ff').addEventListener('click', () => {
+                try {
+                    const type = document.getElementById('dig-ff-type').value;
+                    const Q = parseInt(document.getElementById('dig-ff-q').value);
+                    const S_J_D = parseInt(document.getElementById('dig-ff-s').value);
+                    const R_K = parseInt(document.getElementById('dig-ff-r').value);
+                    
+                    let Qnext, desc;
+                    
+                    if (type === 'SR') {
+                        if (S_J_D === 0 && R_K === 0) { Qnext = Q; desc = "No Change"; }
+                        else if (S_J_D === 0 && R_K === 1) { Qnext = 0; desc = "Reset"; }
+                        else if (S_J_D === 1 && R_K === 0) { Qnext = 1; desc = "Set"; }
+                        else { Qnext = "?"; desc = "Invalid/Forbidden"; }
+                    } else if (type === 'D') {
+                        Qnext = S_J_D; desc = `Set to D`;
+                    } else if (type === 'JK') {
+                        if (S_J_D === 0 && R_K === 0) { Qnext = Q; desc = "No Change"; }
+                        else if (S_J_D === 0 && R_K === 1) { Qnext = 0; desc = "Reset"; }
+                        else if (S_J_D === 1 && R_K === 0) { Qnext = 1; desc = "Set"; }
+                        else { Qnext = Q ? 0 : 1; desc = "Toggle"; }
+                    }
+                    
+                    showResult('dig', `Q(next) = ${Qnext}\n(${desc})`);
+
+                } catch (e) {
+                    showError('dig', e.message);
+                }
+            });
+
+            // ===================================================================
+            // MATH OPS LOGIC
+            // ===================================================================
+            function getMathValues() {
+                const a = parseSI(document.getElementById('math-a').value);
+                const b = parseSI(document.getElementById('math-b').value);
+                return { a, b };
+            }
+            
+            document.getElementById('calc-math-add').addEventListener('click', () => {
+                try {
+                    const { a, b } = getMathValues();
+                    if (a === null || b === null) throw new Error("Need two values.");
+                    showResult('math', `Result = ${formatSI(a + b)}`);
+                } catch(e) { showError('math', e.message); }
+            });
+            document.getElementById('calc-math-sub').addEventListener('click', () => {
+                try {
+                    const { a, b } = getMathValues();
+                    if (a === null || b === null) throw new Error("Need two values.");
+                    showResult('math', `Result = ${formatSI(a - b)}`);
+                } catch(e) { showError('math', e.message); }
+            });
+            document.getElementById('calc-math-mul').addEventListener('click', () => {
+                try {
+                    const { a, b } = getMathValues();
+                    if (a === null || b === null) throw new Error("Need two values.");
+                    showResult('math', `Result = ${formatSI(a * b)}`);
+                } catch(e) { showError('math', e.message); }
+            });
+            document.getElementById('calc-math-div').addEventListener('click', () => {
+                try {
+                    const { a, b } = getMathValues();
+                    if (a === null || b === null) throw new Error("Need two values.");
+                    if (b === 0) throw new Error("Division by zero.");
+                    showResult('math', `Result = ${formatSI(a / b)}`);
+                } catch(e) { showError('math', e.message); }
+            });
+            document.getElementById('calc-math-pow').addEventListener('click', () => {
+                try {
+                    const { a, b } = getMathValues();
+                    if (a === null || b === null) throw new Error("Need two values.");
+                    showResult('math', `Result = ${formatSI(Math.pow(a, b))}`);
+                } catch(e) { showError('math', e.message); }
+            });
+            document.getElementById('calc-math-sqrt').addEventListener('click', () => {
+                try {
+                    const { a } = getMathValues();
+                    if (a === null) throw new Error("Need value A.");
+                    if (a < 0) throw new Error("Cannot take sqrt of negative number.");
+                    showResult('math', `Result = ${formatSI(Math.sqrt(a))}`);
+                } catch(e) { showError('math', e.message); }
+            });
+            document.getElementById('calc-math-log10').addEventListener('click', () => {
+                try {
+                    const { a } = getMathValues();
+                    if (a === null) throw new Error("Need value A.");
+                    if (a <= 0) throw new Error("Log10 is undefined for non-positive numbers.");
+                    showResult('math', `Result = ${formatSI(Math.log10(a))}`);
+                } catch(e) { showError('math', e.message); }
+            });
+
+        });
+    </script>
+</body>
+</html>
