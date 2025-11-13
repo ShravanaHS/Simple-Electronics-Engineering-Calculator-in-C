@@ -3,13 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electronics Engineering Calculator</title>
+    <title>Basic Electronics Calculator</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load expr-eval.js for math parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/expr-eval/2.0.2/expr-eval.min.js"></script>
     <style>
+        /* =================================================================== */
+        /* --- (This is the "CSS File" content) --- */
+        /* =================================================================== */
+
+        /* --- Content Fade-in Animation --- */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .fade-in {
+            /* This animation will apply when the 'active' class is added by JS */
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        /* --- Home Tab Card Hover Effect --- */
+        .home-card {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer; /* NEW: Add pointer cursor */
+        }
+        .home-card:hover {
+            transform: scale(1.03) translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: #2563eb; /* blue-600 */
+        }
+        
         /* Custom styles */
         body {
             font-family: 'Inter', sans-serif;
+            /* GitHub-dark style background */
+            background-color: #0d1117;
+            color: #d1d5db;
         }
         .tab-btn.active {
             border-bottom-color: #2563eb; /* blue-600 */
@@ -18,6 +54,11 @@
         }
         .tab-btn {
             transition: all 0.2s ease-in-out;
+        }
+        /* --- NEW: Main Tab Hover Animation --- */
+        .tab-btn:hover:not(.active) {
+            transform: translateY(-3px);
+            background-color: #1f2937; /* gray-800 */
         }
         .calc-section {
             display: none; /* Hide all sections */
@@ -28,28 +69,40 @@
         
         /* Sub-tabs for nested calculators */
         .sub-tab-btn {
-            background-color: #f3f4f6; /* gray-100 */
-            border: 1px solid #d1d5db; /* gray-300 */
+            background-color: #374151; /* gray-700 */
+            border: 1px solid #4b5563; /* gray-600 */
             padding: 0.5rem 1rem;
             border-radius: 0.375rem; /* rounded-md */
             font-size: 0.875rem; /* text-sm */
             font-weight: 500; /* medium */
-            color: #374151; /* gray-700 */
+            color: #d1d5db; /* gray-300 */
             transition: all 0.2s ease;
         }
         .sub-tab-btn:hover {
-            background-color: #e5e7eb; /* gray-200 */
+            background-color: #4b5563; /* gray-600 */
         }
         .sub-tab-btn.active {
-            background-color: #dbeafe; /* blue-100 */
-            color: #1d4ed8; /* blue-700 */
-            border-color: #93c5fd; /* blue-300 */
+            background-color: #1e40af; /* blue-800 */
+            color: #eff6ff; /* blue-50 */
+            border-color: #2563eb; /* blue-600 */
         }
         .sub-calc-section {
             display: none;
         }
+        /* --- NEW: Sub-Tab Content Animation --- */
+        @keyframes subTabSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
         .sub-calc-section.active {
             display: block;
+            animation: subTabSlideIn 0.3s ease-out forwards;
         }
 
         /* Resistor color dropdowns */
@@ -60,6 +113,9 @@
             background-image: none;
             border-left-width: 8px;
             padding-left: 0.5rem;
+            background-color: #374151; /* gray-700 */
+            border-color: #4b5563; /* gray-600 */
+            color: white;
         }
         
         /* Digital Logic Table */
@@ -69,55 +125,54 @@
             border-collapse: collapse;
         }
         #truth-table-output th, #truth-table-output td {
-            border: 1px solid #d1d5db;
+            border: 1px solid #4b5563; /* gray-600 */
             padding: 0.5rem;
             text-align: center;
-        }
-        #truth-table-output th {
-            background-color: #f3f4f6;
-        }
-        
-        /* Dark theme overrides */
-        body.bg-gray-900 {
-            color: #d1d5db; /* gray-300 */
-        }
-        .sub-tab-btn {
-            background-color: #374151; /* gray-700 */
-            border-color: #4b5563; /* gray-600 */
-            color: #d1d5db; /* gray-300 */
-        }
-        .sub-tab-btn:hover {
-            background-color: #4b5563; /* gray-600 */
-        }
-        .sub-tab-btn.active {
-            background-color: #1e40af; /* blue-800 */
-            color: #eff6ff; /* blue-50 */
-            border-color: #2563eb; /* blue-600 */
-        }
-        .color-select {
-            background-color: #374151; /* gray-700 */
-            border-color: #4b5563; /* gray-600 */
-            color: white;
-        }
-        #truth-table-output th, #truth-table-output td {
-            border-color: #4b5563; /* gray-600 */
         }
         #truth-table-output th {
             background-color: #1f2937; /* gray-800 */
         }
         
+        /* Theory content styling */
+        .theory-content h4 {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            color: #93c5fd; /* blue-300 */
+            margin-top: 1.5rem; /* mt-6 */
+            margin-bottom: 0.5rem; /* mb-2 */
+        }
+        .theory-content p, .theory-content ul {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #d1d5db; /* gray-300 */
+        }
+        .theory-content ul {
+            list-style-type: disc;
+            padding-left: 1.5rem; /* pl-6 */
+            margin-top: 0.5rem; /* mt-2 */
+        }
+        .theory-content code {
+            background-color: #1f2937; /* gray-800 */
+            color: #c7d2fe; /* indigo-200 */
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+        }
+        
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
+<body class="bg-gray-900 min-h-screen p-4 md:p-8">
 
-    <div class="max-w-5xl mx-auto bg-gray-800 border border-gray-700 rounded-lg shadow-2xl overflow-hidden">
-        <header class="p-6 bg-gray-900 border-b border-gray-700">
-            <h1 class="text-3xl font-bold text-white">Electronics Engineering Calculator</h1>
+    <div class="max-w-7xl mx-auto bg-gray-800 border border-gray-700 rounded-lg shadow-2xl overflow-hidden">
+        <header class="p-6 bg-gray-900 border-b border-gray-700 fade-in">
+            <h1 class="text-3xl font-bold text-white">Basic Electronics Calculator</h1>
         </header>
 
         <!-- Main Tab Navigation -->
-        <nav class="flex flex-wrap border-b border-gray-700 bg-gray-800">
-            <button class="tab-btn active flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="ohms-law">Ohm's Law</button>
+        <nav class="flex flex-wrap border-b border-gray-700 bg-gray-800 fade-in" style="animation-delay: 100ms;">
+            <button class="tab-btn active flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="home">Home</button>
+            <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="ohms-law">Ohm's Law</button>
             <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="resistor">Resistor</button>
             <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="capacitor">Capacitor</button>
             <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="inductor">Inductor</button>
@@ -128,405 +183,811 @@
         <main class="p-6 md:p-8 bg-gray-800">
 
             <!-- =================================================================== -->
-            <!-- Ohm's Law Calculator -->
+            <!-- Home Section -->
             <!-- =================================================================== -->
-            <section id="ohms-law" class="calc-section active">
-                <h2 class="text-2xl font-semibold mb-4 text-blue-300">Ohm's Law & Power (V, I, R, P)</h2>
-                
-                <!-- Sub-tabs for Ohm's Law -->
-                <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="ohms-law">
-                    <button class="sub-tab-btn active" data-sub-tab="ohms-v">Calculate Voltage (V)</button>
-                    <button class="sub-tab-btn" data-sub-tab="ohms-i">Calculate Current (I)</button>
-                    <button class="sub-tab-btn" data-sub-tab="ohms-r">Calculate Resistance (R)</button>
-                    <button class="sub-tab-btn" data-sub-tab="ohms-p">Calculate Power (P)</button>
-                </div>
-
-                <!-- Calculate Voltage -->
-                <div id="ohms-v" class="sub-calc-section active" data-sub-tab-parent="ohms-law">
-                    <div class="space-y-4">
-                        <select id="ohms-v-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
-                            <option value="ir">from I and R (V = I * R)</option>
-                            <option value="pi">from P and I (V = P / I)</option>
-                            <option value="pr">from P and R (V = sqrt(P * R))</option>
-                        </select>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input type="text" id="ohms-v-i" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Current (A)">
-                            <input type="text" id="ohms-v-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)">
-                            <input type="text" id="ohms-v-p" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Power (W)" style="display: none;">
-                        </div>
-                    </div>
+            <section id="home" class="calc-section active fade-in">
+                <div class="mb-8 p-6 bg-gray-900 border border-gray-700 rounded-lg">
+                    <h2 class="text-3xl font-semibold mb-4 text-white">Welcome to Basic Electronics Calculator</h2>
+                    <p class="text-lg text-gray-300">
+                        This is an all-in-one web calculator for electronics students, hobbyists, and engineers. It's designed to provide quick, accurate calculations for the most common electronics and digital logic problems.
+                    </p>
                 </div>
                 
-                <!-- Calculate Current -->
-                <div id="ohms-i" class="sub-calc-section" data-sub-tab-parent="ohms-law">
-                    <div class="space-y-4">
-                        <select id="ohms-i-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
-                            <option value="vr">from V and R (I = V / R)</option>
-                            <option value="pv">from P and V (I = P / V)</option>
-                            <option value="pr">from P and R (I = sqrt(P / R))</option>
-                        </select>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input type="text" id="ohms-i-v" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Voltage (V)">
-                            <input type="text" id="ohms-i-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)">
-                            <input type="text" id="ohms-i-p" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Power (W)" style="display: none;">
+                <h3 class="text-2xl font-semibold pt-4 mb-6 text-blue-300">What It Does</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Ohm's Law Card -->
+                    <div class="home-card bg-gray-900 p-6 rounded-lg border border-gray-700 flex space-x-4" data-target-tab="ohms-law">
+                        <svg class="w-12 h-12 text-blue-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                        </svg>
+                        <div>
+                            <h4 class="text-xl font-semibold text-white">Ohm's Law & Power</h4>
+                            <p class="text-gray-300 mt-1">Calculate Voltage (V), Current (I), Resistance (R), and Power (P) using the fundamental circuit laws.</p>
+                        </div>
+                    </div>
+                    <!-- Resistor Card -->
+                    <div class="home-card bg-gray-900 p-6 rounded-lg border border-gray-700 flex space-x-4" data-target-tab="resistor">
+                        <svg class="w-12 h-12 text-blue-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4 12h2l2-6 3 12 3-12 3 12 2-6h2" />
+                        </svg>
+                        <div>
+                            <h4 class="text-xl font-semibold text-white">Resistor Tools</h4>
+                            <p class="text-gray-300 mt-1">Find series/parallel combinations, decode 4/5-band color codes, read SMD codes, and calculate resistance from resistivity.</p>
+                        </div>
+                    </div>
+                    <!-- Capacitor Card -->
+                    <div class="home-card bg-gray-900 p-6 rounded-lg border border-gray-700 flex space-x-4" data-target-tab="capacitor">
+                        <svg class="w-12 h-12 text-blue-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h4M7 5v14M17 5v14M17 12h4" />
+                        </svg>
+                        <div>
+                            <h4 class="text-xl font-semibold text-white">Capacitor Tools</h4>
+                            <p class="text-gray-300 mt-1">Calculate series/parallel, charge (Q), energy (E), RC time constants, and capacitive reactance (Xc).</p>
+                        </div>
+                    </div>
+                    <!-- Inductor Card -->
+                    <div class="home-card bg-gray-900 p-6 rounded-lg border border-gray-700 flex space-x-4" data-target-tab="inductor">
+                        <svg class="w-12 h-12 text-blue-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4 12h3c0-3 1.5-3 3-3s3 1.5 3 3c0-3 1.5-3 3-3s3 1.5 3 3h3" />
+                        </svg>
+                        <div>
+                            <h4 class="text-xl font-semibold text-white">Inductor Tools</h4>
+                            <p class="text-gray-300 mt-1">Find series/parallel, stored energy (E), RL time constants, inductive reactance (Xl), and decode SMD codes.</p>
+                        </div>
+                    </div>
+                    <!-- Digital Logic Card -->
+                    <div class="home-card bg-gray-900 p-6 rounded-lg border border-gray-700 flex space-x-4" data-target-tab="digital">
+                        <svg class="w-12 h-12 text-blue-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M7 7v10m0-5h4M13 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
+                        </svg>
+                        <div>
+                            <h4 class="text-xl font-semibold text-white">Digital Logic</h4>
+                            <p class="text-gray-300 mt-1">Convert between number systems (BIN, DEC, HEX), perform bitwise operations, generate truth tables, and simulate flip-flops.</p>
+                        </div>
+                    </div>
+                    <!-- Math Ops Card -->
+                    <div class="home-card bg-gray-900 p-6 rounded-lg border border-gray-700 flex space-x-4" data-target-tab="math">
+                        <svg class="w-12 h-12 text-blue-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m-10.5-6.364L15.364 15M8.636 15L15.364 8.636" />
+                        </svg>
+                        <div>
+                            <h4 class="text-xl font-semibold text-white">Math Operations</h4>
+                            <p class="text-gray-300 mt-1">A simple module for basic arithmetic operations (add, subtract, power, sqrt, log10) that support SI prefixes.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Calculate Resistance -->
-                <div id="ohms-r" class="sub-calc-section" data-sub-tab-parent="ohms-law">
-                    <div class="space-y-4">
-                        <select id="ohms-r-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
-                            <option value="vi">from V and I (R = V / I)</option>
-                            <option value="vp">from V and P (R = V² / P)</option>
-                            <option value="pi">from P and I (R = P / I²)</option>
-                        </select>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input type="text" id="ohms-r-v" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Voltage (V)">
-                            <input type="text" id="ohms-r-i" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Current (A)">
-                            <input type="text" id="ohms-r-p" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Power (W)" style="display: none;">
+                <!-- How to Use Section -->
+                <section class="mb-8 p-6 bg-gray-900 border border-gray-700 rounded-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-blue-300">How to Use This Calculator</h2>
+                    <div class="space-y-4 text-gray-300">
+                        <p>
+                            1. Start by clicking one of the main tabs above (e.g., Ohm's Law, Resistor, Capacitor).
+                        </p>
+                        <p>
+                            2. Inside each section, click on the sub-tabs to select the specific calculation you want to perform (e.g., "Calculate Voltage (V)", "Color Code → Value").
+                        </p>
+                        <p>
+                            3. Enter your values in the input fields. This calculator understands standard SI unit prefixes, so you can enter values like <strong class="text-white">"10k"</strong> for 10,000, <strong class="text-white">"4.7u"</strong> for 0.0000047, or <strong class="text-white">"22n"</strong> for 22 nanofarads.
+                        </p>
+
+                        <h3 class="text-xl font-semibold pt-4 text-blue-300">Supported SI Prefixes</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-max text-left border-collapse">
+                                <thead class="bg-gray-700">
+                                    <tr>
+                                        <th class="p-3 border border-gray-600">Prefix</th>
+                                        <th class="p-3 border border-gray-600">Symbol(s)</th>
+                                        <th class="p-3 border border-gray-600">Multiplier</th>
+                                        <th class="p-3 border border-gray-600">Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-gray-800">
+                                        <td class="p-3 border border-gray-600">Tera</td>
+                                        <td class="p-3 border border-gray-600">T</td>
+                                        <td class="p-3 border border-gray-600">10<sup>12</sup></td>
+                                        <td class="p-3 border border-gray-600">1,000,000,000,000</td>
+                                    </tr>
+                                    <tr class="bg-gray-800">
+                                        <td class="p-3 border border-gray-600">Giga</td>
+                                        <td class="p-3 border border-gray-600">G</td>
+                                        <td class="p-3 border border-gray-600">10<sup>9</sup></td>
+                                        <td class="p-3 border border-gray-600">1,000,000,000</td>
+                                    </tr>
+                                    <tr class="bg-gray-800">
+                                        <td class="p-3 border border-gray-600">Mega</td>
+                                        <td class="p-3 border border-gray-600">M</td>
+                                        <td class="p-3 border border-gray-600">10<sup>6</sup></td>
+                                        <td class="p-3 border border-gray-600">1,000,000</td>
+                                    </tr>
+                                    <tr class="bg-gray-800">
+                                        <td class="p-3 border border-gray-600">Kilo</td>
+                                        <td class="p-3 border border-gray-600">k, K</td>
+                                        <td class="p-3 border border-gray-600">10<sup>3</sup></td>
+                                        <td class="p-3 border border-gray-600">1,000</td>
+                                    </tr>
+                                    <tr class="bg-gray-800">
+                                        <td class="p-3 border border-gray-600">(Base Unit)</td>
+                                        <td class="p-3 border border-gray-600">(none)</td>
+                                        <td class="p-3 border border-gray-600">10<sup>0</sup></td>
+                                        <td class="p-3 border border-gray-600">1</td>
+                                    </tr>
+                                    <tr class="bg-gray-800">
+                                        <td class="p-3 border border-gray-600">Milli</td>
+                                        <td class="p-3 border border-gray-600">m</td>
+                                        <td class="p-3 border border-gray-600">10<sup>-3</sup></td>
+                                        <td class="p-3 border border-gray-600">0.001</td>
+                                    </tr>
+                                    <tr class="bg-gray-800">
+                                        <td class="p-3 border border-gray-600">Micro</td>
+                                        <td class="p-3 border border-gray-600">u, U</td>
+                                        <td class="p-3 border border-gray-600">10<sup>-6</sup></td>
+                                        <td class="p-3 border border-gray-600">0.000001</td>
+                                    </tr>
+                                    <tr class="bg-gray-800">
+                                        <td class="p-3 border border-gray-600">Nano</td>
+                                        <td class="p-3 border border-gray-600">n</td>
+                                        <td class="p-3 border border-gray-600">10<sup>-9</sup></td>
+                                        <td class="p-3 border border-gray-600">0.000000001</td>
+                                    </tr>
+                                    <tr class="bg-gray-800">
+                                        <td class="p-3 border border-gray-600">Pico</td>
+                                        <td class="p-3 border border-gray-600">p</td>
+                                        <td class="p-3 border border-gray-600">10<sup>-12</sup></td>
+                                        <td class="p-3 border border-gray-600">0.000000000001</td>
+                                    </tr>
+                                    <tr class="bg-gray-800">
+                                        <td class="p-3 border border-gray-600">Femto</td>
+                                        <td class="p-3 border border-gray-600">f</td>
+                                        <td class="p-3 border border-gray-600">10<sup>-15</sup></td>
+                                        <td class="p-3 border border-gray-600">0.000000000000001</td>
+                                    </tr>
+                                    <tr class="bg-gray-800">
+                                        <td class="p-3 border border-gray-600">Resistance (special)</td>
+                                        <td class="p-3 border border-gray-600">R, r</td>
+                                        <td class="p-3 border border-gray-600" colspan="2">Used as a decimal (e.g., "4R7" = 4.7)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </div>
-
-                <!-- Calculate Power -->
-                <div id="ohms-p" class="sub-calc-section" data-sub-tab-parent="ohms-law">
-                    <div class="space-y-4">
-                        <select id="ohms-p-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
-                            <option value="vi">from V and I (P = V * I)</option>
-                            <option value="vr">from V and R (P = V² / R)</option>
-                            <option value="ir">from I and R (P = I² * R)</option>
-                        </select>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input type="text" id="ohms-p-v" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Voltage (V)">
-                            <input type="text" id="ohms-p-i" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Current (A)">
-                            <input type="text" id="ohms-p-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)" style="display: none;">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Common Buttons and Result -->
-                <div class="mt-6 flex gap-4">
-                    <button id="calculate-ohms" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500">Calculate</button>
-                    <button id="clear-ohms" class="px-6 py-2 bg-gray-600 text-gray-100 font-medium rounded-md shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-400">Clear</button>
-                </div>
-                <div id="ohms-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
-                <div id="ohms-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+                </section>
             </section>
 
+            <!-- =================================================================== -->
+            <!-- Ohm's Law Calculator -->
+            <!-- =================================================================== -->
+            <section id="ohms-law" class="calc-section">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Column 1: Calculator -->
+                    <div class="lg:col-span-2">
+                        <h2 class="text-2xl font-semibold mb-4 text-blue-300">Ohm's Law & Power Calculator</h2>
+                        
+                        <!-- Sub-tabs for Ohm's Law -->
+                        <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="ohms-law">
+                            <button class="sub-tab-btn active" data-sub-tab="ohms-v">Calculate Voltage (V)</button>
+                            <button class="sub-tab-btn" data-sub-tab="ohms-i">Calculate Current (I)</button>
+                            <button class="sub-tab-btn" data-sub-tab="ohms-r">Calculate Resistance (R)</button>
+                            <button class="sub-tab-btn" data-sub-tab="ohms-p">Calculate Power (P)</button>
+                        </div>
+        
+                        <!-- Calculate Voltage -->
+                        <div id="ohms-v" class="sub-calc-section active" data-sub-tab-parent="ohms-law">
+                            <div class="space-y-4">
+                                <select id="ohms-v-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+                                    <option value="ir">from I and R (V = I * R)</option>
+                                    <option value="pi">from P and I (V = P / I)</option>
+                                    <option value="pr">from P and R (V = sqrt(P * R))</option>
+                                </select>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="text" id="ohms-v-i" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Current (A)">
+                                    <input type="text" id="ohms-v-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)">
+                                    <input type="text" id="ohms-v-p" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Power (W)" style="display: none;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Calculate Current -->
+                        <div id="ohms-i" class="sub-calc-section" data-sub-tab-parent="ohms-law">
+                            <div class="space-y-4">
+                                <select id="ohms-i-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+                                    <option value="vr">from V and R (I = V / R)</option>
+                                    <option value="pv">from P and V (I = P / V)</option>
+                                    <option value="pr">from P and R (I = sqrt(P / R))</option>
+                                </select>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="text" id="ohms-i-v" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Voltage (V)">
+                                    <input type="text" id="ohms-i-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)">
+                                    <input type="text" id="ohms-i-p" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Power (W)" style="display: none;">
+                                </div>
+                            </div>
+                        </div>
+        
+                        <!-- Calculate Resistance -->
+                        <div id="ohms-r" class="sub-calc-section" data-sub-tab-parent="ohms-law">
+                            <div class="space-y-4">
+                                <select id="ohms-r-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+                                    <option value="vi">from V and I (R = V / I)</option>
+                                    <option value="vp">from V and P (R = V² / P)</option>
+                                    <option value="pi">from P and I (R = P / I²)</option>
+                                </select>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="text" id="ohms-r-v" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Voltage (V)">
+                                    <input type="text" id="ohms-r-i" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Current (A)">
+                                    <input type="text" id="ohms-r-p" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Power (W)" style="display: none;">
+                                </div>
+                            </div>
+                        </div>
+        
+                        <!-- Calculate Power -->
+                        <div id="ohms-p" class="sub-calc-section" data-sub-tab-parent="ohms-law">
+                            <div class="space-y-4">
+                                <select id="ohms-p-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+                                    <option value="vi">from V and I (P = V * I)</option>
+                                    <option value="vr">from V and R (P = V² / R)</option>
+                                    <option value="ir">from I and R (P = I² * R)</option>
+                                </select>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="text" id="ohms-p-v" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Voltage (V)">
+                                    <input type="text" id="ohms-p-i" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Current (A)">
+                                    <input type="text" id="ohms-p-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)" style="display: none;">
+                                </div>
+                            </div>
+                        </div>
+        
+                        <!-- Common Buttons and Result -->
+                        <div class="mt-6 flex gap-4">
+                            <button id="calculate-ohms" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500">Calculate</button>
+                            <button id="clear-ohms" class="px-6 py-2 bg-gray-600 text-gray-100 font-medium rounded-md shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-400">Clear</button>
+                        </div>
+                        <div id="ohms-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
+                        <div id="ohms-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- Column 2: Theory -->
+                    <div class="lg:col-span-1 p-6 bg-gray-900 rounded-lg theory-content">
+                        <h3 class="text-xl font-semibold mb-4 text-blue-300">About Ohm's Law</h3>
+                        <!-- <img src="https://placehold.co/400x200/1f2937/93c5fd?text=V%3DIR+Triangle" alt="Ohm's Law Triangle V=IR" class="w-full rounded-lg mb-4 opacity-75"> -->
+                        
+                        <h4>What is Ohm's Law?</h4>
+                        <p>
+                            Ohm's Law, named after physicist Georg Ohm, is a fundamental principle in electronics. It states that the current (I) flowing through a conductor is directly proportional to the voltage (V) applied across it and inversely proportional to its resistance (R).
+                        </p>
+                        <p class="mt-2">
+                            The primary formula is: <code>V = I × R</code>
+                        </p>
+                        
+                        <h4>Key Concepts & Units</h4>
+                        <ul>
+                            <li><strong>Voltage (V):</strong> The potential difference or "electrical pressure" that causes current to flow. Measured in <strong>Volts (V)</strong>.</li>
+                            <li><strong>Current (I):</strong> The flow rate of electric charge. Measured in <strong>Amperes (A)</strong> or "Amps".</li>
+                            <li><strong>Resistance (R):</strong> The component's opposition to the flow of current. Measured in <strong>Ohms (Ω)</strong>.</li>
+                        </ul>
+
+                        <h4>Power Law (Watt's Law)</h4>
+                        <p>
+                            Closely related is the Power Law, which describes the rate (P) at which electrical energy is transferred, used, or dissipated by a circuit.
+                        </p>
+                        <p class="mt-2">
+                            The primary formula is: <code>P = V × I</code>
+                        </p>
+                        <ul>
+                            <li><strong>Power (P):</strong> The rate of energy consumption or dissipation, often seen as heat. Measured in <strong>Watts (W)</strong>.</li>
+                        </ul>
+                        
+                        <h4>Applications</h4>
+                        <ul>
+                            <li>Calculating the correct current-limiting resistor for an LED.</li>
+                            <li>Finding the current draw of a component to size a power supply.</li>
+                            <li>Designing voltage dividers to create a specific reference voltage.</li>
+                            <li>Ensuring a component's power rating is not exceeded.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
             <!-- =================================================================== -->
             <!-- Resistor Calculator -->
             <!-- =================================================================== -->
             <section id="resistor" class="calc-section">
-                <h2 class="text-2xl font-semibold mb-4 text-blue-300">Resistor Calculator</h2>
-                
-                <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="resistor">
-                    <button class="sub-tab-btn active" data-sub-tab="res-series-parallel">Series / Parallel</button>
-                    <button class="sub-tab-btn" data-sub-tab="res-color-code">Color Code → Value</button>
-                    <button class="sub-tab-btn" data-sub-tab="res-smd-code">SMD Code → Value</button>
-                    <button class="sub-tab-btn" data-sub-tab="res-resistivity">Resistivity</button>
-                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Column 1: Calculator -->
+                    <div class="lg:col-span-2">
+                        <h2 class="text-2xl font-semibold mb-4 text-blue-300">Resistor Calculator</h2>
+                        
+                        <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="resistor">
+                            <button class="sub-tab-btn active" data-sub-tab="res-series-parallel">Series / Parallel</button>
+                            <button class="sub-tab-btn" data-sub-tab="res-color-code">Color Code → Value</button>
+                            <button class="sub-tab-btn" data-sub-tab="res-smd-code">SMD Code → Value</button>
+                            <button class="sub-tab-btn" data-sub-tab="res-resistivity">Resistivity</button>
+                        </div>
+        
+                        <!-- Resistor Series/Parallel -->
+                        <div id="res-series-parallel" class="sub-calc-section active" data-sub-tab-parent="resistor">
+                            <label for="res-sp-values" class="block text-sm font-medium text-gray-300">Enter resistor values (comma separated)</label>
+                            <input type="text" id="res-sp-values" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 10k, 4.7k, 220">
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-res-series" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Series</button>
+                                <button id="calc-res-parallel" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Parallel</button>
+                            </div>
+                        </div>
+        
+                        <!-- Resistor Color Code -->
+                        <div id="res-color-code" class="sub-calc-section" data-sub-tab-parent="resistor">
+                            <select id="res-color-bands" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md mb-4">
+                                <option value="4">4-Band</option>
+                                <option value="5">5-Band</option>
+                            </select>
+                            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                <select id="res-band-1" class="color-select w-full p-2 rounded-md"></select>
+                                <select id="res-band-2" class="color-select w-full p-2 rounded-md"></select>
+                                <select id="res-band-3" class="color-select w-full p-2 rounded-md" style="display: none;"></select>
+                                <select id="res-band-multiplier" class="color-select w-full p-2 rounded-md"></select>
+                                <select id="res-band-tolerance" class="color-select w-full p-2 rounded-md"></select>
+                            </div>
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-res-color" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Value</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Resistor SMD Code -->
+                        <div id="res-smd-code" class="sub-calc-section" data-sub-tab-parent="resistor">
+                            <label for="res-smd-input" class="block text-sm font-medium text-gray-300">Enter 3/4-digit or EIA-96 Code</label>
+                            <input type="text" id="res-smd-input" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 472, 1001, 49C">
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-res-smd" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Decode SMD</button>
+                            </div>
+                        </div>
+        
+                        <!-- Resistor Resistivity -->
+                        <div id="res-resistivity" class="sub-calc-section" data-sub-tab-parent="resistor">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <select id="res-material" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
+                                    <!-- Options added by JS -->
+                                </select>
+                                <input type="text" id="res-length" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Length (L) in meters">
+                                <input type="text" id="res-area" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Area (A) in m²">
+                            </div>
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-res-resistivity" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Resistance</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Common Result/Error for Resistor -->
+                        <div id="res-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
+                        <div id="res-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- Column 2: Theory -->
+                    <div class="lg:col-span-1 p-6 bg-gray-900 rounded-lg theory-content">
+                        <h3 class="text-xl font-semibold mb-4 text-blue-300">About Resistors</h3>
+                        <!-- <img src="https://placehold.co/400x200/1f2937/93c5fd?text=Resistor+Types" alt="Through-hole and SMD resistors" class="w-full rounded-lg mb-4 opacity-75"> -->
+                        
+                        <h4>What is a Resistor?</h4>
+                        <p>
+                            A resistor is a passive component that creates resistance in the flow of electric current. Its primary purpose is to limit current, divide voltages, or create a known voltage drop. Resistance is measured in <strong>Ohms (Ω)</strong>.
+                        </p>
+                        
+                        <h4>Series & Parallel</h4>
+                        <ul>
+                            <li><strong>Series:</strong> Resistors are connected end-to-end. The total resistance is the sum of all individual resistances. The current is the same through all components.
+                            <br><code>R_total = R1 + R2 + ...</code></li>
+                            <li><strong>Parallel:</strong> Resistors are connected across the same two points. The voltage is the same across all components. The total resistance is the reciprocal of the sum of the reciprocals.
+                            <br><code>1/R_total = 1/R1 + 1/R2 + ...</code></li>
+                        </ul>
 
-                <!-- Resistor Series/Parallel -->
-                <div id="res-series-parallel" class="sub-calc-section active" data-sub-tab-parent="resistor">
-                    <label for="res-sp-values" class="block text-sm font-medium text-gray-300">Enter resistor values (comma separated)</label>
-                    <input type="text" id="res-sp-values" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 10k, 4.7k, 220">
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-res-series" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Series</button>
-                        <button id="calc-res-parallel" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Parallel</button>
-                    </div>
-                </div>
+                        <h4>Color Codes</h4>
+                        <p>
+                            Through-hole resistors use colored bands to indicate their resistance value and tolerance. A 4-band resistor uses two digits, a multiplier, and tolerance. A 5-band resistor adds a third digit for higher precision.
+                        </p>
 
-                <!-- Resistor Color Code -->
-                <div id="res-color-code" class="sub-calc-section" data-sub-tab-parent="resistor">
-                    <select id="res-color-bands" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md mb-4">
-                        <option value="4">4-Band</option>
-                        <option value="5">5-Band</option>
-                    </select>
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        <select id="res-band-1" class="color-select w-full p-2 rounded-md"></select>
-                        <select id="res-band-2" class="color-select w-full p-2 rounded-md"></select>
-                        <select id="res-band-3" class="color-select w-full p-2 rounded-md" style="display: none;"></select>
-                        <select id="res-band-multiplier" class="color-select w-full p-2 rounded-md"></select>
-                        <select id="res-band-tolerance" class="color-select w-full p-2 rounded-md"></select>
-                    </div>
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-res-color" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Value</button>
+                        <h4>SMD Codes</h4>
+                        <p>
+                            Surface-Mount Device (SMD) resistors use short numeric codes.
+                        </p>
+                        <ul>
+                            <li><strong>3-Digit (e.g., 472):</strong> <code>47 × 10² = 4700Ω</code> or <code>4.7kΩ</code>.</li>
+                            <li><strong>4-Digit (e.g., 1001):</strong> <code>100 × 10¹ = 1000Ω</code> or <code>1kΩ</code>.</li>
+                            <li><strong>EIA-96 (e.g., 49C):</strong> A 1% code. <code>49</code> maps to <code>316</code> and <code>C</code> maps to <code>×100</code>. Result: <code>31.6kΩ</code>.</li>
+                        </ul>
                     </div>
                 </div>
-                
-                <!-- Resistor SMD Code -->
-                <div id="res-smd-code" class="sub-calc-section" data-sub-tab-parent="resistor">
-                    <label for="res-smd-input" class="block text-sm font-medium text-gray-300">Enter 3/4-digit or EIA-96 Code</label>
-                    <input type="text" id="res-smd-input" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 472, 1001, 49C">
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-res-smd" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Decode SMD</button>
-                    </div>
-                </div>
-
-                <!-- Resistor Resistivity -->
-                <div id="res-resistivity" class="sub-calc-section" data-sub-tab-parent="resistor">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <select id="res-material" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
-                            <!-- Options added by JS -->
-                        </select>
-                        <input type="text" id="res-length" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Length (L) in meters">
-                        <input type="text" id="res-area" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Area (A) in m²">
-                    </div>
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-res-resistivity" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Resistance</button>
-                    </div>
-                </div>
-                
-                <!-- Common Result/Error for Resistor -->
-                <div id="res-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
-                <div id="res-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
             </section>
 
             <!-- =================================================================== -->
             <!-- Capacitor Calculator -->
             <!-- =================================================================== -->
             <section id="capacitor" class="calc-section">
-                <h2 class="text-2xl font-semibold mb-4 text-blue-300">Capacitor Calculator</h2>
-                
-                <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="capacitor">
-                    <button class="sub-tab-btn active" data-sub-tab="cap-series-parallel">Series / Parallel</button>
-                    <button class="sub-tab-btn" data-sub-tab="cap-charge-energy">Charge / Energy</button>
-                    <button class="sub-tab-btn" data-sub-tab="cap-tau-xc">Time Constant / Reactance</button>
-                    <button class="sub-tab-btn" data-sub-tab="cap-smd-code">SMD Code → Value</button>
-                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Column 1: Calculator -->
+                    <div class="lg:col-span-2">
+                        <h2 class="text-2xl font-semibold mb-4 text-blue-300">Capacitor Calculator</h2>
+                        
+                        <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="capacitor">
+                            <button class="sub-tab-btn active" data-sub-tab="cap-series-parallel">Series / Parallel</button>
+                            <button class="sub-tab-btn" data-sub-tab="cap-charge-energy">Charge / Energy</button>
+                            <button class="sub-tab-btn" data-sub-tab="cap-tau-xc">Time Constant / Reactance</button>
+                            <button class="sub-tab-btn" data-sub-tab="cap-smd-code">SMD Code → Value</button>
+                        </div>
+        
+                        <!-- Capacitor Series/Parallel -->
+                        <div id="cap-series-parallel" class="sub-calc-section active" data-sub-tab-parent="capacitor">
+                            <label for="cap-sp-values" class="block text-sm font-medium text-gray-300">Enter capacitor values (comma separated)</label>
+                            <input type="text" id="cap-sp-values" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 10u, 22n, 100p">
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-cap-series" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Series</button>
+                                <button id="calc-cap-parallel" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Parallel</button>
+                            </div>
+                        </div>
+        
+                        <!-- Capacitor Charge/Energy -->
+                        <div id="cap-charge-energy" class="sub-calc-section" data-sub-tab-parent="capacitor">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input type="text" id="cap-ce-c" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Capacitance (F)">
+                                <input type="text" id="cap-ce-v" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Voltage (V)">
+                            </div>
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-cap-charge" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Charge (Q)</button>
+                                <button id="calc-cap-energy" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Energy (E)</button>
+                            </div>
+                        </div>
+        
+                        <!-- Capacitor Time Constant/Reactance -->
+                        <div id="cap-tau-xc" class="sub-calc-section" data-sub-tab-parent="capacitor">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <input type="text" id="cap-tx-c" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Capacitance (F)">
+                                <input type="text" id="cap-tx-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)">
+                                <input type="text" id="cap-tx-f" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Frequency (Hz)">
+                            </div>
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-cap-tau" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Time Constant (τ)</button>
+                                <button id="calc-cap-xc" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Reactance (Xc)</button>
+                            </div>
+                        </div>
+        
+                        <!-- Capacitor SMD Code -->
+                        <div id="cap-smd-code" class="sub-calc-section" data-sub-tab-parent="capacitor">
+                            <label for="cap-smd-input" class="block text-sm font-medium text-gray-300">Enter 3-digit Code</label>
+                            <input type="text" id="cap-smd-input" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 104, 472, 225">
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-cap-smd" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Decode SMD</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Common Result/Error for Capacitor -->
+                        <div id="cap-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
+                        <div id="cap-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- Column 2: Theory -->
+                    <div class="lg:col-span-1 p-6 bg-gray-900 rounded-lg theory-content">
+                        <h3 class="text-xl font-semibold mb-4 text-blue-300">About Capacitors</h3>
+                        <!-- <img src="https://placehold.co/400x200/1f2937/93c5fd?text=Capacitor+Symbol" alt="Capacitor schematic symbol" class="w-full rounded-lg mb-4 opacity-75"> -->
+                        
+                        <h4>What is a Capacitor?</h4>
+                        <p>
+                            A capacitor is a passive component that stores electrical energy in an electrostatic field. It consists of two conductive plates separated by a dielectric (insulating) material. Its ability to store charge is called capacitance, measured in <strong>Farads (F)</strong>.
+                        </p>
 
-                <!-- Capacitor Series/Parallel -->
-                <div id="cap-series-parallel" class="sub-calc-section active" data-sub-tab-parent="capacitor">
-                    <label for="cap-sp-values" class="block text-sm font-medium text-gray-300">Enter capacitor values (comma separated)</label>
-                    <input type="text" id="cap-sp-values" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 10u, 22n, 100p">
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-cap-series" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Series</button>
-                        <button id="calc-cap-parallel" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Parallel</button>
-                    </div>
-                </div>
+                        <h4>Key Formulas</h4>
+                        <ul>
+                            <li><strong>Series:</strong> <code>1/C_total = 1/C1 + 1/C2 + ...</code> (This is opposite to resistors)</li>
+                            <li><strong>Parallel:</strong> <code>C_total = C1 + C2 + ...</code> (This is opposite to resistors)</li>
+                            <li><strong>Charge:</strong> <code>Q = C × V</code> (Q is charge in Coulombs)</li>
+                            <li><strong>Energy:</strong> <code>E = ½ × C × V²</code> (E is energy in Joules)</li>
+                        </ul>
 
-                <!-- Capacitor Charge/Energy -->
-                <div id="cap-charge-energy" class="sub-calc-section" data-sub-tab-parent="capacitor">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="cap-ce-c" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Capacitance (F)">
-                        <input type="text" id="cap-ce-v" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Voltage (V)">
-                    </div>
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-cap-charge" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Charge (Q)</button>
-                        <button id="calc-cap-energy" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Energy (E)</button>
+                        <h4>AC & DC Behavior</h4>
+                        <ul>
+                            <li><strong>Time Constant (τ):</strong> In an RC circuit, <code>τ = R × C</code>. This constant defines the time it takes for the capacitor to charge to ~63.2% of the source voltage or discharge to ~36.8% of its initial voltage.</li>
+                            <li><strong>Capacitive Reactance (Xc):</strong> A capacitor's opposition to AC current. It acts as an open circuit to DC (infinite resistance) and a short circuit to high-frequency AC (low resistance).
+                            <br><code>Xc = 1 / (2πfC)</code> (Xc in Ohms)</li>
+                        </ul>
                     </div>
                 </div>
-
-                <!-- Capacitor Time Constant/Reactance -->
-                <div id="cap-tau-xc" class="sub-calc-section" data-sub-tab-parent="capacitor">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <input type="text" id="cap-tx-c" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Capacitance (F)">
-                        <input type="text" id="cap-tx-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)">
-                        <input type="text" id="cap-tx-f" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Frequency (Hz)">
-                    </div>
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-cap-tau" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Time Constant (τ)</button>
-                        <button id="calc-cap-xc" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Reactance (Xc)</button>
-                    </div>
-                </div>
-
-                <!-- Capacitor SMD Code -->
-                <div id="cap-smd-code" class="sub-calc-section" data-sub-tab-parent="capacitor">
-                    <label for="cap-smd-input" class="block text-sm font-medium text-gray-300">Enter 3-digit Code</label>
-                    <input type="text" id="cap-smd-input" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 104, 472, 225">
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-cap-smd" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Decode SMD</button>
-                    </div>
-                </div>
-                
-                <!-- Common Result/Error for Capacitor -->
-                <div id="cap-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
-                <div id="cap-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
             </section>
-
+            
             <!-- =================================================================== -->
             <!-- Inductor Calculator -->
             <!-- =================================================================== -->
             <section id="inductor" class="calc-section">
-                <h2 class="text-2xl font-semibold mb-4 text-blue-300">Inductor Calculator</h2>
-                
-                <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="inductor">
-                    <button class="sub-tab-btn active" data-sub-tab="ind-series-parallel">Series / Parallel</button>
-                    <button class="sub-tab-btn" data-sub-tab="ind-energy">Energy</button>
-                    <button class="sub-tab-btn" data-sub-tab="ind-tau-xl">Time Constant / Reactance</button>
-                    <button class="sub-tab-btn" data-sub-tab="ind-smd-code">SMD Code → Value</button>
-                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Column 1: Calculator -->
+                    <div class="lg:col-span-2">
+                        <h2 class="text-2xl font-semibold mb-4 text-blue-300">Inductor Calculator</h2>
+                        
+                        <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="inductor">
+                            <button class="sub-tab-btn active" data-sub-tab="ind-series-parallel">Series / Parallel</button>
+                            <button class="sub-tab-btn" data-sub-tab="ind-energy">Energy</button>
+                            <button class="sub-tab-btn" data-sub-tab="ind-tau-xl">Time Constant / Reactance</button>
+                            <button class="sub-tab-btn" data-sub-tab="ind-smd-code">SMD Code → Value</button>
+                        </div>
+        
+                        <!-- Inductor Series/Parallel -->
+                        <div id="ind-series-parallel" class="sub-calc-section active" data-sub-tab-parent="inductor">
+                            <label for="ind-sp-values" class="block text-sm font-medium text-gray-300">Enter inductor values (comma separated)</label>
+                            <input type="text" id="ind-sp-values" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 10m, 4.7u, 22u">
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-ind-series" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Series</button>
+                                <button id="calc-ind-parallel" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Parallel</button>
+                            </div>
+                        </div>
+        
+                        <!-- Inductor Energy -->
+                        <div id="ind-energy" class="sub-calc-section" data-sub-tab-parent="inductor">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input type="text" id="ind-en-l" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Inductance (H)">
+                                <input type="text" id="ind-en-i" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Current (A)">
+                            </div>
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-ind-energy" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Energy (E)</button>
+                            </div>
+                        </div>
+        
+                        <!-- Inductor Time Constant/Reactance -->
+                        <div id="ind-tau-xl" class="sub-calc-section" data-sub-tab-parent="inductor">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <input type="text" id="ind-tx-l" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Inductance (H)">
+                                <input type="text" id="ind-tx-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)">
+                                <input type="text" id="ind-tx-f" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Frequency (Hz)">
+                            </div>
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-ind-tau" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Time Constant (τ)</button>
+                                <button id="calc-ind-xl" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Reactance (Xl)</button>
+                            </div>
+                        </div>
+        
+                        <!-- Inductor SMD Code -->
+                        <div id="ind-smd-code" class="sub-calc-section" data-sub-tab-parent="inductor">
+                            <label for="ind-smd-input" class="block text-sm font-medium text-gray-300">Enter SMD Code</label>
+                            <input type="text" id="ind-smd-input" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 4R7, 101, 220">
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-ind-smd" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Decode SMD</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Common Result/Error for Inductor -->
+                        <div id="ind-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
+                        <div id="ind-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+                    </div>
 
-                <!-- Inductor Series/Parallel -->
-                <div id="ind-series-parallel" class="sub-calc-section active" data-sub-tab-parent="inductor">
-                    <label for="ind-sp-values" class="block text-sm font-medium text-gray-300">Enter inductor values (comma separated)</label>
-                    <input type="text" id="ind-sp-values" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 10m, 4.7u, 22u">
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-ind-series" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Series</button>
-                        <button id="calc-ind-parallel" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Parallel</button>
-                    </div>
-                </div>
+                    <!-- Column 2: Theory -->
+                    <div class="lg:col-span-1 p-6 bg-gray-900 rounded-lg theory-content">
+                        <h3 class="text-xl font-semibold mb-4 text-blue-300">About Inductors</h3>
+                        <!-- <img src="https://placehold.co/400x200/1f2937/93c5fd?text=Inductor+Symbol" alt="Inductor schematic symbol" class="w-full rounded-lg mb-4 opacity-75"> -->
+                        
+                        <h4>What is an Inductor?</h4>
+                        <p>
+                            An inductor, or coil, is a passive component that stores energy in a magnetic field. It's typically a wire wound into a coil. Its primary property is to oppose *changes* in the current flowing through it (Lenz's Law). Inductance is measured in <strong>Henries (H)</strong>.
+                        </p>
 
-                <!-- Inductor Energy -->
-                <div id="ind-energy" class="sub-calc-section" data-sub-tab-parent="inductor">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="ind-en-l" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Inductance (H)">
-                        <input type="text" id="ind-en-i" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Current (A)">
-                    </div>
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-ind-energy" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Energy (E)</button>
-                    </div>
-                </div>
+                        <h4>Key Formulas</h4>
+                        <ul>
+                            <li><strong>Series:</strong> <code>L_total = L1 + L2 + ...</code> (Like resistors)</li>
+                            <li><strong>Parallel:</strong> <code>1/L_total = 1/L1 + 1/L2 + ...</code> (Like resistors)</li>
+                            <li><strong>Energy:</strong> <code>E = ½ × L × I²</code> (E is energy in Joules)</li>
+                        </ul>
 
-                <!-- Inductor Time Constant/Reactance -->
-                <div id="ind-tau-xl" class="sub-calc-section" data-sub-tab-parent="inductor">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <input type="text" id="ind-tx-l" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Inductance (H)">
-                        <input type="text" id="ind-tx-r" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Resistance (Ω)">
-                        <input type="text" id="ind-tx-f" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Frequency (Hz)">
-                    </div>
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-ind-tau" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Time Constant (τ)</button>
-                        <button id="calc-ind-xl" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Reactance (Xl)</button>
+                        <h4>AC & DC Behavior</h4>
+                        <ul>
+                            <li><strong>Time Constant (τ):</strong> In an RL circuit, <code>τ = L / R</code>. This constant defines the time it takes for the current to reach ~63.2% of its final, steady-state value.</li>
+                            <li><strong>Inductive Reactance (Xl):</strong> An inductor's opposition to AC current. It acts as a short circuit to DC (zero resistance) and an open circuit to high-frequency AC (high resistance).
+                            <br><code>Xl = 2πfL</code> (Xl in Ohms)</li>
+                        </ul>
                     </div>
                 </div>
-
-                <!-- Inductor SMD Code -->
-                <div id="ind-smd-code" class="sub-calc-section" data-sub-tab-parent="inductor">
-                    <label for="ind-smd-input" class="block text-sm font-medium text-gray-300">Enter SMD Code</label>
-                    <input type="text" id="ind-smd-input" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 4R7, 101, 220">
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-ind-smd" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Decode SMD</button>
-                    </div>
-                </div>
-                
-                <!-- Common Result/Error for Inductor -->
-                <div id="ind-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
-                <div id="ind-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
             </section>
 
             <!-- =================================================================== -->
             <!-- Digital Logic Calculator -->
             <!-- =================================================================== -->
             <section id="digital" class="calc-section">
-                <h2 class="text-2xl font-semibold mb-4 text-blue-300">Digital Logic Module</h2>
-                
-                <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="digital">
-                    <button class="sub-tab-btn active" data-sub-tab="dig-convert">Number Conversion</button>
-                    <button class="sub-tab-btn" data-sub-tab="dig-bitwise">Bitwise Ops</button>
-                    <button class="sub-tab-btn" data-sub-tab="dig-shift">Shift / Rotate</button>
-                    <button class="sub-tab-btn" data-sub-tab="dig-truth-table">Truth Table</button>
-                    <button class="sub-tab-btn" data-sub-tab="dig-flip-flop">Flip-Flop</button>
-                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Column 1: Calculator -->
+                    <div class="lg:col-span-2">
+                        <h2 class="text-2xl font-semibold mb-4 text-blue-300">Digital Logic Module</h2>
+                        
+                        <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="digital">
+                            <button class="sub-tab-btn active" data-sub-tab="dig-convert">Number Conversion</button>
+                            <button class="sub-tab-btn" data-sub-tab="dig-bitwise">Bitwise Ops</button>
+                            <button class="sub-tab-btn" data-sub-tab="dig-shift">Shift / Rotate</button>
+                            <button class="sub-tab-btn" data-sub-tab="dig-truth-table">Truth Table</button>
+                            <button class="sub-tab-btn" data-sub-tab="dig-flip-flop">Flip-Flop</button>
+                        </div>
+        
+                        <!-- Digital Number Conversion -->
+                        <div id="dig-convert" class="sub-calc-section active" data-sub-tab-parent="digital">
+                            <label for="dig-conv-input" class="block text-sm font-medium text-gray-300">Enter number (0b, 0x, 0 for octal, or dec)</label>
+                            <input type="text" id="dig-conv-input" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 0b1011, 0xFF, 077, 255">
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-dig-convert" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Convert</button>
+                            </div>
+                        </div>
+        
+                        <!-- Digital Bitwise Ops -->
+                        <div id="dig-bitwise" class="sub-calc-section" data-sub-tab-parent="digital">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input type="text" id="dig-bit-a" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Operand A (e.g., 0b1010)">
+                                <input type="text" id="dig-bit-b" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Operand B (e.g., 0b1100)">
+                            </div>
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-dig-bitwise" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Ops</button>
+                            </div>
+                        </div>
+        
+                        <!-- Digital Shift/Rotate -->
+                        <div id="dig-shift" class="sub-calc-section" data-sub-tab-parent="digital">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input type="text" id="dig-shift-val" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Value (e.g., 0b1001)">
+                                <input type="number" id="dig-shift-amount" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Amount (0-31)" min="0" max="31">
+                            </div>
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-dig-shift" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Shift/Rotate</button>
+                            </div>
+                        </div>
+        
+                        <!-- Digital Truth Table -->
+                        <div id="dig-truth-table" class="sub-calc-section" data-sub-tab-parent="digital">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <select id="dig-gate-type" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
+                                    <option value="AND">AND</option>
+                                    <option value="OR">OR</option>
+                                    <option value="NAND">NAND</option>
+                                    <option value="NOR">NOR</option>
+                                    <option value="XOR">XOR</option>
+                                    <option value="XNOR">XNOR</option>
+                                    <option value="NOT">NOT</option>
+                                </select>
+                                <select id="dig-gate-inputs" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
+                                    <option value="1">1 Input</option>
+                                    <option value="2">2 Inputs</option>
+                                    <option value="3">3 Inputs</option>
+                                </select>
+                            </div>
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-dig-truth-table" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Generate Table</button>
+                            </div>
+                            <div id="truth-table-output" class="mt-4 overflow-x-auto"></div>
+                        </div>
+        
+                        <!-- Digital Flip-Flop -->
+                        <div id="dig-flip-flop" class="sub-calc-section" data-sub-tab-parent="digital">
+                            <select id="dig-ff-type" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md mb-4">
+                                <option value="SR">SR Flip-Flop</option>
+                                <option value="D">D Flip-Flop</option>
+                                <option value="JK">JK Flip-Flop</option>
+                            </select>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <select id="dig-ff-q" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
+                                    <option value="0">Previous Q = 0</option>
+                                    <option value="1">Previous Q = 1</option>
+                                </select>
+                                <select id="dig-ff-s" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
+                                    <option value="0">S / D / J = 0</option>
+                                    <option value="1">S / D / J = 1</option>
+                                </select>
+                                <select id="dig-ff-r" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
+                                    <option value="0">R / K = 0</option>
+                                    <option value="1">R / K = 1</option>
+                                </select>
+                            </div>
+                            <div class="mt-4 flex gap-4">
+                                <button id="calc-dig-ff" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Q(next)</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Common Result/Error for Digital -->
+                        <div id="dig-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace;"></div>
+                        <div id="dig-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- Column 2: Theory -->
+                    <div class="lg:col-span-1 p-6 bg-gray-900 rounded-lg theory-content">
+                        <h3 class="text-xl font-semibold mb-4 text-blue-300">About Digital Logic</h3>
+                        <!-- <img src="https://placehold.co/400x200/1f2937/93c5fd?text=Logic+Gates" alt="Basic logic gates symbols" class="w-full rounded-lg mb-4 opacity-75"> -->
+                        
+                        <h4>What is Digital Logic?</h4>
+                        <p>
+                            Digital logic is the foundation of all modern digital electronics, including computers. It operates on a binary system, where signals are represented by only two discrete levels: <strong>0 (False / Low)</strong> and <strong>1 (True / High)</strong>.
+                        </p>
 
-                <!-- Digital Number Conversion -->
-                <div id="dig-convert" class="sub-calc-section active" data-sub-tab-parent="digital">
-                    <label for="dig-conv-input" class="block text-sm font-medium text-gray-300">Enter number (0b, 0x, 0 for octal, or dec)</label>
-                    <input type="text" id="dig-conv-input" class="mt-1 block w-full p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="e.g., 0b1011, 0xFF, 077, 255">
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-dig-convert" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Convert</button>
+                        <h4>Number Systems</h4>
+                        <p>
+                            Computers use binary, but humans often use other systems for convenience:
+                        </p>
+                        <ul>
+                            <li><strong>Binary (0b):</strong> Base-2. Uses only 0s and 1s. (e.g., <code>0b1011</code> = 11)</li>
+                            <li><strong>Decimal (Dec):</strong> Base-10. (e.g., <code>11</code>)</li>
+                            <li><strong>Hexadecimal (0x):</strong> Base-16. Uses 0-9 and A-F. (e.g., <code>0xB</code> = 11)</li>
+                            <li><strong>Octal (0):</strong> Base-8. Uses 0-7. (e.g., <code>013</code> = 11)</li>
+                        </ul>
+                        
+                        <h4>Key Concepts</h4>
+                        <ul>
+                            <li><strong>Logic Gates:</strong> The basic building blocks. An <code>AND</code> gate is 1 only if all inputs are 1. An <code>OR</code> gate is 1 if *any* input is 1. A <code>NOT</code> gate inverts the input.</li>
+                            <li><strong>Bitwise Ops:</strong> Operations that manipulate numbers at the individual bit level (AND, OR, XOR, NOT).</li>
+                            <li><strong>Flip-Flops:</strong> A circuit that "remembers" a single bit (0 or 1). It is the basic unit of memory (RAM).</li>
+                        </ul>
                     </div>
                 </div>
-
-                <!-- Digital Bitwise Ops -->
-                <div id="dig-bitwise" class="sub-calc-section" data-sub-tab-parent="digital">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="dig-bit-a" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Operand A (e.g., 0b1010)">
-                        <input type="text" id="dig-bit-b" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Operand B (e.g., 0b1100)">
-                    </div>
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-dig-bitwise" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Ops</button>
-                    </div>
-                </div>
-
-                <!-- Digital Shift/Rotate -->
-                <div id="dig-shift" class="sub-calc-section" data-sub-tab-parent="digital">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="dig-shift-val" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Value (e.g., 0b1001)">
-                        <input type="number" id="dig-shift-amount" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Amount (0-31)" min="0" max="31">
-                    </div>
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-dig-shift" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Shift/Rotate</button>
-                    </div>
-                </div>
-
-                <!-- Digital Truth Table -->
-                <div id="dig-truth-table" class="sub-calc-section" data-sub-tab-parent="digital">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <select id="dig-gate-type" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
-                            <option value="AND">AND</option>
-                            <option value="OR">OR</option>
-                            <option value="NAND">NAND</option>
-                            <option value="NOR">NOR</option>
-                            <option value="XOR">XOR</option>
-                            <option value="XNOR">XNOR</option>
-                            <option value="NOT">NOT</option>
-                        </select>
-                        <select id="dig-gate-inputs" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
-                            <option value="1">1 Input</option>
-                            <option value="2">2 Inputs</option>
-                            <option value="3">3 Inputs</option>
-                        </select>
-                    </div>
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-dig-truth-table" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Generate Table</button>
-                    </div>
-                    <div id="truth-table-output" class="mt-4 overflow-x-auto"></div>
-                </div>
-
-                <!-- Digital Flip-Flop -->
-                <div id="dig-flip-flop" class="sub-calc-section" data-sub-tab-parent="digital">
-                    <select id="dig-ff-type" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md mb-4">
-                        <option value="SR">SR Flip-Flop</option>
-                        <option value="D">D Flip-Flop</option>
-                        <option value="JK">JK Flip-Flop</option>
-                    </select>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <select id="dig-ff-q" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
-                            <option value="0">Previous Q = 0</option>
-                            <option value="1">Previous Q = 1</option>
-                        </select>
-                        <select id="dig-ff-s" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
-                            <option value="0">S / D / J = 0</option>
-                            <option value="1">S / D / J = 1</option>
-                        </select>
-                        <select id="dig-ff-r" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md">
-                            <option value="0">R / K = 0</option>
-                            <option value="1">R / K = 1</option>
-                        </select>
-                    </div>
-                    <div class="mt-4 flex gap-4">
-                        <button id="calc-dig-ff" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Calculate Q(next)</button>
-                    </div>
-                </div>
-                
-                <!-- Common Result/Error for Digital -->
-                <div id="dig-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace;"></div>
-                <div id="dig-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
             </section>
 
             <!-- =================================================================== -->
             <!-- Math Ops Calculator -->
             <!-- =================================================================== -->
             <section id="math" class="calc-section">
-                <h2 class="text-2xl font-semibold mb-4 text-blue-300">Mathematical Operations</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" id="math-a" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Value A (supports prefixes)">
-                    <input type="text" id="math-b" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Value B (supports prefixes)">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Column 1: Calculator -->
+                    <div class="lg:col-span-2">
+                        <h2 class="text-2xl font-semibold mb-4 text-blue-300">Mathematical Operations</h2>
+                        
+                        <!-- NEW: Sub-tabs for Math -->
+                        <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="math">
+                            <button class="sub-tab-btn active" data-sub-tab="math-basic">Basic Ops</button>
+                            <button class="sub-tab-btn" data-sub-tab="math-expression">Expression Solver</button>
+                        </div>
+                        
+                        <!-- NEW: Basic Ops Sub-section -->
+                        <div id="math-basic" class="sub-calc-section active" data-sub-tab-parent="math">
+                            <p class="mb-4 text-gray-300">A simple calculator for basic arithmetic that supports SI prefix inputs.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input type="text" id="math-a" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Value A (supports prefixes)">
+                                <input type="text" id="math-b" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Value B (supports prefixes)">
+                            </div>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <button id="calc-math-add" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A + B</button>
+                                <button id="calc-math-sub" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A - B</button>
+                                <button id="calc-math-mul" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A * B</button>
+                                <button id="calc-math-div" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A / B</button>
+                                <button id="calc-math-pow" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A ^ B</button>
+                                <button id="calc-math-sqrt" class="px-4 py-2 bg-gray-600 text-gray-100 font-medium rounded-md shadow-sm hover:bg-gray-500">sqrt(A)</button>
+                                <button id="calc-math-log10" class="px-4 py-2 bg-gray-600 text-gray-100 font-medium rounded-md shadow-sm hover:bg-gray-500">log10(A)</button>
+                            </div>
+                        </div>
+                        
+                        <!-- NEW: Expression Solver Sub-section -->
+                        <div id="math-expression" class="sub-calc-section" data-sub-tab-parent="math">
+                             <p class="mb-4 text-gray-300">
+                                Enter a full mathematical expression. The calculator understands order of operations, parentheses,
+                                <code>sqrt()</code>, and all SI prefixes (e.g., <code>5k</code>, <code>3m</code>, <code>22p</code>).
+                            </p>
+                            
+                            <div class="space-y-4">
+                                <label for="math-expression-input" class="block text-sm font-medium text-gray-300">Enter Expression:</label>
+                                <textarea id="math-expression-input" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-md font-mono text-lg" rows="4" placeholder="(2*(3m + 5k) - 10*(22p / 254)) / 5*(3.14*sqrt(49))"></textarea>
+                            </div>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <button id="calc-math-expression" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Solve</button>
+                            </div>
+                        </div>
+
+                        <!-- Common Result/Error for Math -->
+                        <div id="math-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
+                        <div id="math-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- Column 2: Theory -->
+                    <div class="lg:col-span-1 p-6 bg-gray-900 rounded-lg theory-content">
+                        <h3 class="text-xl font-semibold mb-4 text-blue-300">About This Module</h3>
+                        <p>
+                            This module provides two tools: a basic calculator and an expression solver. It combines the SI prefix parsing from other modules with a standard order-of-operations (PEMDAS) solver.
+                        </p>
+                        <h4>Features</h4>
+                        <ul>
+                            <li><strong>SI Prefixes:</strong> All prefixes (<code>T</code>, <code>G</code>, <code>M</code>, <code>k</code>, <code>m</code>, <code>u</code>, <code>n</code>, <code>p</code>, <code>f</code>) are automatically converted to their numerical values.</li>
+                            <li><strong>Functions:</strong> Supports common functions like <code>sqrt(x)</code>, <code>log(x)</code>, <code>pow(x, y)</code>, etc.</li>
+                            <li><strong>Constants:</strong> Use <code>pi</code> for 3.14159...</li>
+                            <li><strong>Implicit Multiplication:</strong> Understands <code>5(4+1)</code> as <code>5*(4+1)</code>.</li>
+                        </ul>
+                        <h4>Example</h4>
+                        <p>The expression:</p>
+                        <code>(2*(3m + 5k)) / sqrt(49)</code>
+                        <p>...is solved as:</p>
+                        <code>(2 * (0.003 + 5000)) / 7</code>
+                    </div>
                 </div>
-                <div class="mt-4 flex flex-wrap gap-2">
-                    <button id="calc-math-add" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A + B</button>
-                    <button id="calc-math-sub" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A - B</button>
-                    <button id="calc-math-mul" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A * B</button>
-                    <button id="calc-math-div" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A / B</button>
-                    <button id="calc-math-pow" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">A ^ B</button>
-                    <button id="calc-math-sqrt" class="px-4 py-2 bg-gray-600 text-gray-100 font-medium rounded-md shadow-sm hover:bg-gray-500">sqrt(A)</button>
-                    <button id="calc-math-log10" class="px-4 py-2 bg-gray-600 text-gray-100 font-medium rounded-md shadow-sm hover:bg-gray-500">log10(A)</button>
-                </div>
-                <!-- Common Result/Error for Math -->
-                <div id="math-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
-                <div id="math-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
             </section>
 
         </main>
@@ -541,8 +1002,30 @@
     <!-- =================================================================== -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+
+            /* =================================================================== */
+            /* --- (This is the "JavaScript File" content) --- */
+            /* =================================================================== */
+
+
+            /* --- Animation Initializations --- */
             
-            // --- Core Helper Functions ---
+            // Note: Removed VanillaTilt.js initialization
+
+            /* --- Core Helper Functions --- */
+            
+            // --- NEW: Home Page Card Links ---
+            document.querySelectorAll('.home-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const targetTabId = card.dataset.targetTab;
+                    if (!targetTabId) return;
+                    
+                    const targetTabButton = document.querySelector(`.tab-btn[data-tab="${targetTabId}"]`);
+                    if (targetTabButton) {
+                        targetTabButton.click();
+                    }
+                });
+            });
 
             /**
              * Parses a string with SI prefixes (e.g., "10k", "4.7u", "10M") into a float.
@@ -633,27 +1116,54 @@
                 tab.addEventListener('click', () => {
                     mainTabs.forEach(t => t.classList.remove('active'));
                     mainSections.forEach(s => s.classList.remove('active'));
+                    
                     tab.classList.add('active');
-                    document.getElementById(tab.dataset.tab).classList.add('active');
+                    const targetSection = document.getElementById(tab.dataset.tab);
+                    
+                    if (targetSection) {
+                        // --- Animation Logic ---
+                        // 1. Remove fade-in class from all sections to reset
+                        mainSections.forEach(s => s.classList.remove('fade-in'));
+                        
+                        // 2. Force a browser "reflow". This trick makes the animation replay.
+                        void targetSection.offsetWidth; 
+                        
+                        // 3. Add classes back to the target section
+                        targetSection.classList.add('active');
+                        targetSection.classList.add('fade-in');
+                        // --- End Animation Logic ---
+                    }
                 });
             });
 
-            // --- Sub-Tab Navigation Logic ---
+            /* --- Sub-Tab Navigation Logic --- */
             const subTabContainers = document.querySelectorAll('[data-sub-tab-container]');
 
             subTabContainers.forEach(container => {
                 const subTabs = container.querySelectorAll('.sub-tab-btn');
-                const subSections = document.querySelectorAll(`[data-sub-tab-parent="${container.dataset.subTabContainer}"]`);
+                const parentId = container.dataset.subTabContainer;
+                const subSections = document.querySelectorAll(`[data-sub-tab-parent="${parentId}"]`);
 
                 subTabs.forEach(tab => {
                     tab.addEventListener('click', () => {
                         subTabs.forEach(t => t.classList.remove('active'));
-                        subSections.forEach(s => s.classList.remove('active'));
+                        subSections.forEach(s => s.classList.remove('active')); // Hide all
+                        
                         tab.classList.add('active');
-                        document.getElementById(tab.dataset.subTab).classList.add('active');
+                        const targetSection = document.getElementById(tab.dataset.subTab);
+                        
+                        if (targetSection) {
+                            // Force reflow to replay animation
+                            targetSection.classList.remove('active');
+                            void targetSection.offsetWidth;
+                            targetSection.classList.add('active');
+                        }
                     });
                 });
             });
+            
+            /* --- Sub-Tab Navigation Logic --- */
+            /* DUPLICATED BLOCK REMOVED */
 
 
             // --- Generic Result/Error Display Functions ---
@@ -1385,7 +1895,7 @@
                 
                 // Update labels
                 const sLabel = document.querySelector('label[for="dig-ff-s"]'); // Would need to add labels
-                const rLabel = document.querySelector('label[for="dig-ff-r"]');
+                const rLabel = document.querySelector('label[for="dig-f-r"]');
                 // This is simpler:
                 document.getElementById('dig-ff-s').options[0].text = (type === 'D') ? 'D = 0' : 'S / J = 0';
                 document.getElementById('dig-ff-s').options[1].text = (type === 'D') ? 'D = 1' : 'S / J = 1';
@@ -1427,6 +1937,8 @@
             // ===================================================================
             // MATH OPS LOGIC
             // ===================================================================
+
+            // --- Logic for Basic Ops ---
             function getMathValues() {
                 const a = parseSI(document.getElementById('math-a').value);
                 const b = parseSI(document.getElementById('math-b').value);
@@ -1486,8 +1998,58 @@
                 } catch(e) { showError('math', e.message); }
             });
 
+            // --- Logic for Expression Solver ---
+
+            /**
+             * Pre-parses an expression string to convert all SI units and fix implicit multiplication.
+             */
+            function preProcessExpression(expr) {
+                // Regex to find all numbers with SI prefixes
+                const siRegex = /\b(\d*\.?\d+)([TGMkmunpf])\b/g;
+                
+                // 1. Replace all SI prefix strings with their numerical values
+                let processedExpr = expr.replace(siRegex, (match) => {
+                    // Use the existing parseSI function
+                    return parseSI(match); 
+                });
+
+                // 2. Fix implicit multiplication
+                // e.g., "5(..." becomes "5*("
+                processedExpr = processedExpr.replace(/(\d)\s*\(/g, '$1 * (');
+                // e.g., "...)(..." becomes "...)*("
+                processedExpr = processedExpr.replace(/\)\s*\(/g, ') * (');
+                // e.g., "... )5" becomes "... ) * 5"
+                processedExpr = processedExpr.replace(/\)\s*(\d)/g, ') * $1');
+
+                return processedExpr;
+            }
+
+            document.getElementById('calc-math-expression').addEventListener('click', () => {
+                try {
+                    const rawExpression = document.getElementById('math-expression-input').value;
+                    if (rawExpression.trim() === '') {
+                        throw new Error("Please enter an expression.");
+                    }
+                    
+                    const processedExpression = preProcessExpression(rawExpression);
+                    
+                    // Use the expr-eval library
+                    const parser = new exprEval.Parser();
+                    
+                    // Add constants that might be useful
+                    parser.consts.pi = Math.PI;
+                    parser.consts.e = Math.E;
+
+                    const result = parser.parse(processedExpression).evaluate();
+                    
+                    showResult('math', `Result = ${formatSI(result)}`);
+
+                } catch (e) {
+                    showError('math', `Parsing Error: ${e.message}. Check your expression for syntax errors.`);
+                }
+            });
+
         });
     </script>
 </body>
-
 </html>
