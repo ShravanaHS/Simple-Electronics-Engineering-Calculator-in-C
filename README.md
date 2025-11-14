@@ -147,12 +147,7 @@ Each module contains its own sub-menu and guides you step-by-step.
 
 ---
 
-## Demo Video
-[Demo Video](https://github.com/YourUser/ShravanaHS/releases/download/v1.0.0/demovid.mp4)
-
-<video src="demovid.mp4" controls width="600">
-  Your browser does not support the video tag.
-</video>
+[Demo Video](https://github.com/ShravanaHS/Simple-Electronics-Engineering-Calculator-in-C/releases/download/v1.0.0/demovid.mp4)
 
 
 ---
