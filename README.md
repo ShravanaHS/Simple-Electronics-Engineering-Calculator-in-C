@@ -214,10 +214,6 @@ Thanks for checking out the project!
 
 ## 🙏 Special Thanks
 
-Special thanks to **[Balaji Sir](https://www.linkedin.com/in/balajeeseshadri/)** for his great tutorials on the [Etalvis Platform](https://learn.etalvis.com/) — his explanations and teaching style inspired this entire project idea.
-
-Also, a huge thanks to the **YouTube community** for their endless practical electronics content, and to **ChatGPT** for assisting in structuring, debugging, and converting the C program into a web-based version.
-
-This project exists because of all these amazing learning resources. ⚡
+Special thanks to **[Balaji Sir](https://www.linkedin.com/in/balajeeseshadri/)** for his great tutorials on the [Etalvis Platform](https://learn.etalvis.com/) — his explanations and teaching style inspired this entire project idea. Also, a huge thanks to the **YouTube community** for their endless practical electronics content, and to **ChatGPT** for assisting in structuring, debugging, and converting the C program into a web-based version. This project exists because of all these amazing learning resources. ⚡
 
 
