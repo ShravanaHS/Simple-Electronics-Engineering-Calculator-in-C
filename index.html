@@ -7,7 +7,7 @@
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load expr-eval.js for math parsing -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/expr-eval/2.0.2/expr-eval.min.js"></script>
+    <!-- REMOVED: script src="https://cdnjs.cloudflare.com/ajax/libs/expr-eval/2.0.2/expr-eval.min.js"></script -->
     <style>
         /* =================================================================== */
         /* --- (This is the "CSS File" content) --- */
@@ -178,6 +178,8 @@
             <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="inductor">Inductor</button>
             <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="digital">Digital Logic</button>
             <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="math">Math Ops</button>
+            <!-- NEW: Expression Solver Tab -->
+            <button class="tab-btn flex-grow p-4 font-medium text-gray-300 hover:bg-gray-700" data-tab="expression">Expression Solver</button>
         </nav>
 
         <main class="p-6 md:p-8 bg-gray-800">
@@ -254,6 +256,16 @@
                         <div>
                             <h4 class="text-xl font-semibold text-white">Math Operations</h4>
                             <p class="text-gray-300 mt-1">A simple module for basic arithmetic operations (add, subtract, power, sqrt, log10) that support SI prefixes.</p>
+                        </div>
+                    </div>
+                    <!-- NEW: Expression Solver Card -->
+                    <div class="home-card bg-gray-900 p-6 rounded-lg border border-gray-700 flex space-x-4" data-target-tab="expression">
+                        <svg class="w-12 h-12 text-blue-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5zM7.5 6h9M7.5 12h9M7.5 18h9" />
+                        </svg>
+                        <div>
+                            <h4 class="text-xl font-semibold text-white">Expression Solver</h4>
+                            <p class="text-gray-300 mt-1">A full scientific calculator that parses complex expressions with SI prefixes and order of operations.</p>
                         </div>
                     </div>
                 </div>
@@ -923,14 +935,10 @@
                     <div class="lg:col-span-2">
                         <h2 class="text-2xl font-semibold mb-4 text-blue-300">Mathematical Operations</h2>
                         
-                        <!-- NEW: Sub-tabs for Math -->
-                        <div class="flex flex-wrap gap-2 mb-6" data-sub-tab-container="math">
-                            <button class="sub-tab-btn active" data-sub-tab="math-basic">Basic Ops</button>
-                            <button class="sub-tab-btn" data-sub-tab="math-expression">Expression Solver</button>
-                        </div>
+                        <!-- REMOVED: Sub-tabs for Math -->
                         
-                        <!-- NEW: Basic Ops Sub-section -->
-                        <div id="math-basic" class="sub-calc-section active" data-sub-tab-parent="math">
+                        <!-- Basic Ops Section (now the main content) -->
+                        <div id="math-basic" class="" data-sub-tab-parent="math">
                             <p class="mb-4 text-gray-300">A simple calculator for basic arithmetic that supports SI prefix inputs.</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <input type="text" id="math-a" class="p-2 bg-gray-700 border border-gray-600 rounded-md" placeholder="Value A (supports prefixes)">
@@ -947,21 +955,7 @@
                             </div>
                         </div>
                         
-                        <!-- NEW: Expression Solver Sub-section -->
-                        <div id="math-expression" class="sub-calc-section" data-sub-tab-parent="math">
-                             <p class="mb-4 text-gray-300">
-                                Enter a full mathematical expression. The calculator understands order of operations, parentheses,
-                                <code>sqrt()</code>, and all SI prefixes (e.g., <code>5k</code>, <code>3m</code>, <code>22p</code>).
-                            </p>
-                            
-                            <div class="space-y-4">
-                                <label for="math-expression-input" class="block text-sm font-medium text-gray-300">Enter Expression:</label>
-                                <textarea id="math-expression-input" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-md font-mono text-lg" rows="4" placeholder="(2*(3m + 5k) - 10*(22p / 254)) / 5*(3.14*sqrt(49))"></textarea>
-                            </div>
-                            <div class="mt-4 flex flex-wrap gap-2">
-                                <button id="calc-math-expression" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Solve</button>
-                            </div>
-                        </div>
+                        <!-- REMOVED: Expression Solver Sub-section -->
 
                         <!-- Common Result/Error for Math -->
                         <div id="math-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
@@ -972,20 +966,68 @@
                     <div class="lg:col-span-1 p-6 bg-gray-900 rounded-lg theory-content">
                         <h3 class="text-xl font-semibold mb-4 text-blue-300">About This Module</h3>
                         <p>
-                            This module provides two tools: a basic calculator and an expression solver. It combines the SI prefix parsing from other modules with a standard order-of-operations (PEMDAS) solver.
+                            This module provides a basic calculator for simple arithmetic. It supports all standard SI prefixes (like 'k', 'm', 'u', etc.) in its inputs, allowing you to quickly perform calculations on electronics values.
                         </p>
                         <h4>Features</h4>
                         <ul>
                             <li><strong>SI Prefixes:</strong> All prefixes (<code>T</code>, <code>G</code>, <code>M</code>, <code>k</code>, <code>m</code>, <code>u</code>, <code>n</code>, <code>p</code>, <code>f</code>) are automatically converted to their numerical values.</li>
-                            <li><strong>Functions:</strong> Supports common functions like <code>sqrt(x)</code>, <code>log(x)</code>, <code>pow(x, y)</code>, etc.</li>
-                            <li><strong>Constants:</strong> Use <code>pi</code> for 3.14159...</li>
-                            <li><strong>Implicit Multiplication:</strong> Understands <code>5(4+1)</code> as <code>5*(4+1)</code>.</li>
+                            <li><strong>Basic Functions:</strong> Supports Add, Subtract, Multiply, Divide, Power, Square Root, and Log10.</li>
                         </ul>
                         <h4>Example</h4>
-                        <p>The expression:</p>
-                        <code>(2*(3m + 5k)) / sqrt(49)</code>
-                        <p>...is solved as:</p>
-                        <code>(2 * (0.003 + 5000)) / 7</code>
+                        <p>Entering <code>5k</code> in Value A and <code>3m</code> in Value B and pressing "A + B" will solve:</p>
+                        <code>5000 + 0.003</code>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================================== -->
+            <!-- NEW: Expression Solver Calculator -->
+            <!-- =================================================================== -->
+            <section id="expression" class="calc-section">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Column 1: Calculator -->
+                    <div class="lg:col-span-2">
+                        <h2 class="text-2xl font-semibold mb-4 text-blue-300">Expression Solver</h2>
+                        
+                        <div id="expression-solver" class="">
+                            <p class="mb-4 text-gray-300">
+                                Enter a full mathematical expression. The calculator understands order of operations, parentheses,
+                                functions like <code>sqrt()</code>, and all SI prefixes (e.g., <code>5k</code>, <code>3m</code>, <code>22p</code>).
+                            </p>
+                            
+                            <div class="space-y-4">
+                                <label for="expression-input" class="block text-sm font-medium text-gray-300">Enter Expression:</label>
+                                <textarea id="expression-input" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-md font-mono text-lg" rows="4" placeholder="e.g., ((45k*33)+(22-21)/((45k-44k)*(23m+44k)))"></textarea>
+                            </div>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <button id="calc-expression" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Solve</button>
+                            </div>
+                        </div>
+
+                        <!-- Common Result/Error for Math -->
+                        <div id="expression-result" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-md text-lg font-medium text-green-300" style="display: none; white-space: pre-wrap;"></div>
+                        <div id="expression-error" class="mt-6 p-4 bg-red-900 border border-red-700 text-red-300 rounded-md" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- Column 2: Theory -->
+                    <div class="lg:col-span-1 p-6 bg-gray-900 rounded-lg theory-content">
+                        <h3 class="text-xl font-semibold mb-4 text-blue-300">About This Solver</h3>
+                        <p>
+                            This is a custom-built parser that reads your expression one piece at a time (a "lexer"),
+                            understands order of operations (PEMDAS) by building a syntax tree (a "parser"),
+                            and then solves the problem (an "evaluator").
+                        </p>
+                        <h4>Features</h4>
+                        <ul>
+                            <li><strong>SI Prefixes:</strong> All prefixes (<code>T</code>, <code>G</code>, <code>M</code>, <code>k</code>, <code>m</code>, <code>u</code>, <code>n</code>, <code>p</code>, <code>f</code>) are automatically converted, even next to operators.</li>
+                            <li><strong>Functions:</strong> Supports <code>sqrt()</code>, <code>log()</code>, <code>pow()</code>.</li>
+                            <li><strong>Constants:</strong> Supports <code>pi</code> and <code>e</code>.</li>
+                            <li><strong>Order of Operations:</strong> Correctly handles <code>( )</code>, <code>^</code>, <code>* /</code>, and <code>+ -</code>.</li>
+                        </ul>
+                        <h4>Example</h4>
+                        <p>Your expression:</p>
+                        <code>((45k*33)+(22-21)/((45k-44k)*(23m+44k)))</code>
+                        <p>...is correctly tokenized and solved, respecting all parentheses and SI units.</p>
                     </div>
                 </div>
             </section>
@@ -2003,51 +2045,251 @@
             /**
              * Pre-parses an expression string to convert all SI units and fix implicit multiplication.
              */
-            function preProcessExpression(expr) {
-                // Regex to find all numbers with SI prefixes
-                const siRegex = /\b(\d*\.?\d+)([TGMkmunpf])\b/g;
-                
-                // 1. Replace all SI prefix strings with their numerical values
-                let processedExpr = expr.replace(siRegex, (match) => {
-                    // Use the existing parseSI function
-                    return parseSI(match); 
-                });
+            /* REMOVED: preProcessExpression function */
 
-                // 2. Fix implicit multiplication
-                // e.g., "5(..." becomes "5*("
-                processedExpr = processedExpr.replace(/(\d)\s*\(/g, '$1 * (');
-                // e.g., "...)(..." becomes "...)*("
-                processedExpr = processedExpr.replace(/\)\s*\(/g, ') * (');
-                // e.g., "... )5" becomes "... ) * 5"
-                processedExpr = processedExpr.replace(/\)\s*(\d)/g, ') * $1');
+            /* REMOVED: calc-math-expression event listener */
 
-                return processedExpr;
+
+            // ===================================================================
+            // NEW: EXPRESSION SOLVER (from scratch)
+            // ===================================================================
+
+            class ExpressionParser {
+                constructor() {
+                    this.siMultipliers = {
+                        'T': 1e12, 'G': 1e9, 'M': 1e6, 'k': 1e3,
+                        'm': 1e-3, 'u': 1e-6, 'n': 1e-9, 'p': 1e-12, 'f': 1e-15
+                    };
+                    
+                    this.operators = {
+                        '+': { prec: 1, assoc: 'L' },
+                        '-': { prec: 1, assoc: 'L' },
+                        '*': { prec: 2, assoc: 'L' },
+                        '/': { prec: 2, assoc: 'L' },
+                        '^': { prec: 3, assoc: 'R' }
+                    };
+
+                    this.functions = ['sqrt', 'log', 'pow'];
+                    this.constants = {
+                        'pi': Math.PI,
+                        'e': Math.E
+                    };
+                }
+
+                // 1. LEXER (TOKENIZER)
+                // This breaks the string into an array of "tokens"
+                tokenize(expr) {
+                    const tokens = [];
+                    expr = expr.replace(/\s+/g, ''); // Remove all whitespace
+                    
+                    let i = 0;
+                    while (i < expr.length) {
+                        const char = expr[i];
+
+                        // OPERATORS
+                        if ('+-*/^'.includes(char)) { // REMOVED parentheses from here
+                            tokens.push({ type: 'op', value: char });
+                            i++;
+                        }
+                        // NEW: PARENTHESES
+                        else if ('()'.includes(char)) {
+                            tokens.push({ type: 'paren', value: char });
+                            i++;
+                        }
+                        // NUMBERS (with SI prefix handling)
+                        else if (/[0-9.]/.test(char)) {
+                            let numStr = '';
+                            while (i < expr.length && /[0-9.]/.test(expr[i])) {
+                                numStr += expr[i];
+                                i++;
+                            }
+                            
+                            let num = parseFloat(numStr);
+                            
+                            // Check for SI prefix
+                            if (i < expr.length && this.siMultipliers[expr[i]]) {
+                                num *= this.siMultipliers[expr[i]];
+                                i++; // Consume prefix
+                            }
+                            tokens.push({ type: 'num', value: num });
+                        }
+                        // FUNCTIONS or CONSTANTS
+                        else if (/[a-zA-Z]/.test(char)) {
+                            let nameStr = '';
+                            while (i < expr.length && /[a-zA-Z0-9_]/.test(expr[i])) {
+                                nameStr += expr[i];
+                                i++;
+                            }
+
+                            if (this.functions.includes(nameStr)) {
+                                tokens.push({ type: 'func', value: nameStr });
+                            } else if (this.constants[nameStr]) {
+                                tokens.push({ type: 'num', value: this.constants[nameStr] });
+                            } else {
+                                throw new Error(`Unknown function or constant: ${nameStr}`);
+                            }
+                        }
+                        // COMMA (for functions like pow(a,b))
+                        else if (char === ',') {
+                            tokens.push({ type: 'comma', value: ',' });
+                            i++;
+                        }
+                        else {
+                            throw new Error(`Unexpected character: ${char}`);
+                        }
+                    }
+                    return tokens;
+                }
+
+                // 2. PARSER (Shunting-Yard Algorithm)
+                // Converts infix tokens to postfix (RPN)
+                parseToRPN(tokens) {
+                    const outputQueue = [];
+                    const opStack = [];
+
+                    for (const token of tokens) {
+                        if (token.type === 'num') {
+                            outputQueue.push(token);
+                        } 
+                        else if (token.type === 'func') {
+                            opStack.push(token);
+                        }
+                        else if (token.type === 'comma') {
+                            while (opStack.length > 0 && opStack[opStack.length - 1].value !== '(') {
+                                outputQueue.push(opStack.pop());
+                            }
+                            if (opStack.length === 0) {
+                                throw new Error("Mismatched parentheses or comma.");
+                            }
+                        }
+                        else if (token.type === 'op') {
+                            while (
+                                opStack.length > 0 &&
+                                opStack[opStack.length - 1].type === 'op' &&
+                                (
+                                    (this.operators[token.value].assoc === 'L' && this.operators[token.value].prec <= this.operators[opStack[opStack.length - 1].value].prec) ||
+                                    (this.operators[token.value].assoc === 'R' && this.operators[token.value].prec < this.operators[opStack[opStack.length - 1].value].prec)
+                                )
+                            ) {
+                                outputQueue.push(opStack.pop());
+                            }
+                            opStack.push(token);
+                        } 
+                        else if (token.type === 'paren' && token.value === '(') { // UPDATED check
+                            opStack.push(token);
+                        } 
+                        else if (token.type === 'paren' && token.value === ')') { // UPDATED check
+                            while (opStack.length > 0 && opStack[opStack.length - 1].value !== '(') {
+                                outputQueue.push(opStack.pop());
+                            }
+                            if (opStack.length === 0) {
+                                throw new Error("Mismatched parentheses.");
+                            }
+                            opStack.pop(); // Pop the '('
+                            
+                            // If token on top of stack is a function, pop it to output
+                            if (opStack.length > 0 && opStack[opStack.length - 1].type === 'func') {
+                                outputQueue.push(opStack.pop());
+                            }
+                        }
+                    }
+
+                    while (opStack.length > 0) {
+                        const op = opStack.pop();
+                        if (op.type === 'paren') { // UPDATED check
+                            throw new Error("Mismatched parentheses.");
+                        }
+                        outputQueue.push(op);
+                    }
+
+                    return outputQueue;
+                }
+
+                // 3. EVALUATOR
+                // Solves the RPN queue
+                evaluateRPN(rpnTokens) {
+                    const stack = [];
+
+                    for (const token of rpnTokens) {
+                        if (token.type === 'num') {
+                            stack.push(token.value);
+                        } 
+                        else if (token.type === 'op') {
+                            const b = stack.pop();
+                            const a = stack.pop();
+                            if (a === undefined || b === undefined) throw new Error("Invalid expression syntax.");
+                            switch (token.value) {
+                                case '+': stack.push(a + b); break;
+                                case '-': stack.push(a - b); break;
+                                case '*': stack.push(a * b); break;
+                                case '/': 
+                                    if (b === 0) throw new Error("Division by zero.");
+                                    stack.push(a / b); 
+                                    break;
+                                case '^': stack.push(Math.pow(a, b)); break;
+                            }
+                        }
+                        else if (token.type === 'func') {
+                            if (token.value === 'pow') {
+                                const b = stack.pop();
+                                const a = stack.pop();
+                                if (a === undefined || b === undefined) throw new Error("pow() requires two arguments.");
+                                stack.push(Math.pow(a, b));
+                            } else {
+                                const a = stack.pop();
+                                if (a === undefined) throw new Error(`Function ${token.value}() requires one argument.`);
+                                switch (token.value) {
+                                    case 'sqrt': 
+                                        if (a < 0) throw new Error("Cannot take square root of negative number.");
+                                        stack.push(Math.sqrt(a)); 
+                                        break;
+                                    case 'log': 
+                                        if (a <= 0) throw new Error("Log is undefined for non-positive numbers.");
+                                        stack.push(Math.log10(a)); 
+                                        break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (stack.length !== 1) {
+                        throw new Error("Invalid expression syntax.");
+                    }
+                    return stack[0];
+                }
+
+                // --- Main Public Method ---
+                solve(expr) {
+                    if (expr.trim() === '') throw new Error("Please enter an expression.");
+                    // Fix implicit multiplication, e.g. 5( or )( or )5
+                    expr = expr.replace(/(\d)\s*\(/g, '$1 * ('); // 5( -> 5 * (
+                    expr = expr.replace(/\)\s*\(/g, ') * ('); // )( -> ) * (
+                    expr = expr.replace(/\)\s*(\d)/g, ') * $1'); // )5 -> ) * 5
+                    
+                    const tokens = this.tokenize(expr);
+                    const rpn = this.parseToRPN(tokens);
+                    const result = this.evaluateRPN(rpn);
+                    return result;
+                }
             }
 
-            document.getElementById('calc-math-expression').addEventListener('click', () => {
+            // --- Hook up the new solver ---
+            const parser = new ExpressionParser();
+            
+            document.getElementById('calc-expression').addEventListener('click', () => {
+                const expr = document.getElementById('expression-input').value;
                 try {
-                    const rawExpression = document.getElementById('math-expression-input').value;
-                    if (rawExpression.trim() === '') {
-                        throw new Error("Please enter an expression.");
-                    }
-                    
-                    const processedExpression = preProcessExpression(rawExpression);
-                    
-                    // Use the expr-eval library
-                    const parser = new exprEval.Parser();
-                    
-                    // Add constants that might be useful
-                    parser.consts.pi = Math.PI;
-                    parser.consts.e = Math.E;
-
-                    const result = parser.parse(processedExpression).evaluate();
-                    
-                    showResult('math', `Result = ${formatSI(result)}`);
-
+                    const result = parser.solve(expr);
+                    showResult('expression', `Result = ${formatSI(result)}`);
+                    document.getElementById('expression-error').style.display = 'none';
                 } catch (e) {
-                    showError('math', `Parsing Error: ${e.message}. Check your expression for syntax errors.`);
+                    showResult('expression', '');
+                    document.getElementById('expression-result').style.display = 'none';
+                    document.getElementById('expression-error').textContent = `Error: ${e.message}`;
+                    document.getElementById('expression-error').style.display = 'block';
                 }
             });
+
 
         });
     </script>
