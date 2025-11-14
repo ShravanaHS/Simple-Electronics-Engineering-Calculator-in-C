@@ -150,7 +150,7 @@ Each module contains its own sub-menu and guides you step-by-step.
 ## Demo Video (Optional)
 
 MP4 Preview:  
-[Watch demo video](demo.mp4)
+[Watch demo video](demovid.mp4)
 
 ---
 
